@@ -1,0 +1,13 @@
+tls_enabled: true
+grpc:
+  host: host_name
+  port: port_number
+email_service:
+  host: localhost
+  port: 1111
+authentication_service:
+  host: localhost
+  port: 1111
+visualization_service:
+  host: localhost
+  port: 1111

@@ -5,11 +5,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	commonConfig "github.com/quadev-ltd/qd-common/pkg/config"
 	commonLogger "github.com/quadev-ltd/qd-common/pkg/log"
 	commonTLS "github.com/quadev-ltd/qd-common/pkg/tls"
 
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/authentication/routes"
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/config"
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
@@ -17,7 +17,7 @@ type ServiceClient struct {
 	Client pb_authentication.AuthenticationServiceClient
 }
 
-func InitServiceClient(config *config.Config) (pb_authentication.AuthenticationServiceClient, error) {
+func InitServiceClient(config *commonConfig.Config) (pb_authentication.AuthenticationServiceClient, error) {
 	grpcServiceAddress := fmt.Sprintf("%s:%s", config.AuthenticationService.Host, config.AuthenticationService.Port)
 
 	clientConnection, err := commonTLS.CreateGRPCConnection(grpcServiceAddress, config.TLSEnabled)
@@ -30,7 +30,7 @@ func InitServiceClient(config *config.Config) (pb_authentication.AuthenticationS
 
 func (service *ServiceClient) Register(ctx *gin.Context) {
 	logger := commonLogger.GetLoggerFromContext(ctx.Request.Context())
-	contextWithCorrelationID, err := commonLogger.TransferCorrelationIdToOutgoingContext(ctx.Request.Context())
+	contextWithCorrelationID, err := commonLogger.TransferCorrelationIDToOutgoingContext(ctx.Request.Context())
 	if err != nil {
 		logger.Error(err, "Error transferring correlation ID to outgoing context")
 		ctx.AbortWithStatus(http.StatusInternalServerError)
@@ -42,7 +42,7 @@ func (service *ServiceClient) Register(ctx *gin.Context) {
 
 func (service *ServiceClient) VerifyEmail(ctx *gin.Context) {
 	logger := commonLogger.GetLoggerFromContext(ctx.Request.Context())
-	contextWithCorrelationID, err := commonLogger.TransferCorrelationIdToOutgoingContext(ctx.Request.Context())
+	contextWithCorrelationID, err := commonLogger.TransferCorrelationIDToOutgoingContext(ctx.Request.Context())
 	if err != nil {
 		logger.Error(err, "Error transferring correlation ID to outgoing context")
 		ctx.AbortWithStatus(http.StatusInternalServerError)
@@ -54,7 +54,7 @@ func (service *ServiceClient) VerifyEmail(ctx *gin.Context) {
 
 func (service *ServiceClient) ResendEmailVerification(ctx *gin.Context) {
 	logger := commonLogger.GetLoggerFromContext(ctx.Request.Context())
-	contextWithCorrelationID, err := commonLogger.TransferCorrelationIdToOutgoingContext(ctx.Request.Context())
+	contextWithCorrelationID, err := commonLogger.TransferCorrelationIDToOutgoingContext(ctx.Request.Context())
 	if err != nil {
 		logger.Error(err, "Error transferring correlation ID to outgoing context")
 		ctx.AbortWithStatus(http.StatusInternalServerError)

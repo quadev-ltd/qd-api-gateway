@@ -5,7 +5,8 @@ import (
 	"os"
 	"strings"
 
-	pkgConfig "github.com/quadev-ltd/qd-common/pkg/config"
+	commonAWS "github.com/quadev-ltd/qd-common/pkg/aws"
+	commonConfig "github.com/quadev-ltd/qd-common/pkg/config"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
@@ -17,20 +18,16 @@ type address struct {
 
 // Config is the configuration of the application
 type Config struct {
-	Verbose               bool
-	Environment           string
-	TLSEnabled            bool `mapstructure:"tls_enabled"`
-	GRPC                  address
-	EmailService          address `mapstructure:"email_service"`
-	AuthenticationService address `mapstructure:"authentication_service"`
-	VisualizationService  address `mapstructure:"visualization_service"`
+	Verbose     bool
+	Environment string
+	AWS         commonAWS.AWSConfig
 }
 
 // Load loads the configuration from the given path yml file
 func (config *Config) Load(path string) error {
-	env := os.Getenv(pkgConfig.AppEnvironmentKey)
+	env := os.Getenv(commonConfig.AppEnvironmentKey)
 	if env == "" {
-		env = pkgConfig.LocalEnvironment
+		env = commonConfig.LocalEnvironment
 	}
 	config.Environment = env
 
@@ -55,7 +52,7 @@ func (config *Config) Load(path string) error {
 		return fmt.Errorf("Error unmarshaling configuration: %v", err)
 	}
 
-	if os.Getenv(pkgConfig.VerboseKey) == "true" {
+	if os.Getenv(commonConfig.VerboseKey) == "true" {
 		config.Verbose = true
 	} else {
 		config.Verbose = false

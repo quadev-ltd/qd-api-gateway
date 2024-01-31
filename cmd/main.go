@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	commontConfig "github.com/quadev-ltd/qd-common/pkg/config"
 	commonLogger "github.com/quadev-ltd/qd-common/pkg/log"
 
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/authentication"
@@ -18,13 +19,20 @@ func main() {
 		log.Fatalln("Failed loading the configurations", err)
 	}
 
+	var centralConfig commontConfig.Config
+	centralConfig.Load(
+		configuration.Environment,
+		configuration.AWS.Key,
+		configuration.AWS.Secret,
+	)
+
 	router := gin.Default()
 
 	router.Use(commonLogger.AddNewCorrelationIDToContext)
 	logger := commonLogger.NewLogFactory(configuration.Environment)
 	router.Use(commonLogger.CreateGinLoggerMiddleware(logger))
 
-	_, err = authentication.RegisterRoutes(router, &configuration)
+	_, err = authentication.RegisterRoutes(router, &centralConfig)
 	if err != nil {
 		log.Fatalln("Failed to register authentication routes", err)
 	}
@@ -36,5 +44,5 @@ func main() {
 	// product.RegisterRoutes(router, &config, authSvc)
 	// order.RegisterRoutes(router, &config, &authSvc)
 
-	router.Run(fmt.Sprintf("%s:%s", configuration.GRPC.Host, configuration.GRPC.Port))
+	router.Run(fmt.Sprintf("%s:%s", centralConfig.GatewayService.Host, centralConfig.GatewayService.Port))
 }

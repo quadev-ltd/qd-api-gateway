@@ -21,7 +21,7 @@ type AutheticationMiddlewarer interface {
 
 type AutheticationMiddleware struct {
 	service          *ServiceClient
-	jwtAuthenticator commonJTW.JWTAthenticatorer
+	jwtAuthenticator commonJTW.Authenticatorer
 }
 
 var _ AutheticationMiddlewarer = &AutheticationMiddleware{}

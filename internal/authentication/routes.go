@@ -4,11 +4,10 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/config"
+	commonConfig "github.com/quadev-ltd/qd-common/pkg/config"
 )
 
-func RegisterRoutes(router *gin.Engine, config *config.Config) (*ServiceClient, error) {
+func RegisterRoutes(router *gin.Engine, config *commonConfig.Config) (*ServiceClient, error) {
 	client, err := InitServiceClient(config)
 	if err != nil {
 		return nil, fmt.Errorf("Could not initialize authentication service client: %v", err)

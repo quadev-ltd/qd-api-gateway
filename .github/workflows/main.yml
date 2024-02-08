@@ -42,6 +42,7 @@ jobs:
 
       - name: Add dertificates
         run: |
+          mkdir certs
           cd certs
           echo "${{ secrets.CA_PEM }}" | base64 -d > ca.pem
           echo "${{ secrets.QD_AUTHENTICATION_API_CRT }}" | base64 -d > qd.authentication.api.crt

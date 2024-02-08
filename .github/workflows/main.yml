@@ -40,7 +40,7 @@ jobs:
           buf generate
           cd -
 
-      - name: Add dertificates
+      - name: Add certificates
         run: |
           mkdir certs
           cd certs

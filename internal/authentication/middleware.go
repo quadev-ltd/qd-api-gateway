@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	commonJTW "github.com/quadev-ltd/qd-common/pkg/jwt"
+	commonJWT "github.com/quadev-ltd/qd-common/pkg/jwt"
 	commonLogger "github.com/quadev-ltd/qd-common/pkg/log"
 
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
@@ -20,8 +20,9 @@ type AutheticationMiddlewarer interface {
 }
 
 type AutheticationMiddleware struct {
-	service          *ServiceClient
-	jwtAuthenticator commonJTW.Authenticatorer
+	service           *ServiceClient
+	jwtAuthenticator  commonJWT.TokenVerifierer
+	jwtTokenInspector commonJWT.TokenInspectorer
 }
 
 var _ AutheticationMiddlewarer = &AutheticationMiddleware{}
@@ -32,13 +33,15 @@ func InitAuthenticationMiddleware(authenticationService *ServiceClient) (Autheti
 	if err != nil {
 		return nil, err
 	}
-	jwtAuthenticator, err := commonJTW.NewJWTAuthenticator(*publicKey)
+	jwtAuthenticator, err := commonJWT.NewTokenVerifier(*publicKey)
 	if err != nil {
 		return nil, err
 	}
+	jwtTokenInspector := &commonJWT.TokenInspector{}
 	return &AutheticationMiddleware{
 		authenticationService,
 		jwtAuthenticator,
+		jwtTokenInspector,
 	}, nil
 }
 
@@ -57,9 +60,9 @@ func RequestPublicKey(service *ServiceClient, correlationID string) (*string, er
 }
 
 func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ctx *gin.Context) {
-	logger := commonLogger.GetLoggerFromContext(ctx.Request.Context())
-	if logger == nil {
-		ctx.AbortWithStatus(http.StatusInternalServerError)
+	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -79,20 +82,31 @@ func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ct
 		return
 	}
 
-	parsedToken, err := autheticationMiddleware.jwtAuthenticator.VerifyToken(token[1])
+	parsedToken, err := autheticationMiddleware.jwtAuthenticator.Verify(token[1])
 	if err != nil {
 		logger.Error(err, "The bearer token was invalid")
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	userEmail, err := autheticationMiddleware.jwtAuthenticator.GetEmailFromToken(parsedToken)
+	tokenType, err := autheticationMiddleware.jwtTokenInspector.GetTypeFromToken(parsedToken)
+	if err != nil {
+		logger.Error(err, "Could not obtain type from bearer token")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	if commonJWT.TokenType(*tokenType) != commonJWT.AccessTokenType {
+		logger.Error(nil, "The bearer token was not an access token")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	userEmail, err := autheticationMiddleware.jwtTokenInspector.GetEmailFromToken(parsedToken)
 	if err != nil {
 		logger.Error(err, "Could not obtain email from bearer token")
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	tokenExpiry, err := autheticationMiddleware.jwtAuthenticator.GetExpiryFromToken(parsedToken)
+	tokenExpiry, err := autheticationMiddleware.jwtTokenInspector.GetExpiryFromToken(parsedToken)
 	if err != nil {
 		logger.Error(err, "Could not obatain expiry from bearer token")
 		ctx.AbortWithStatus(http.StatusUnauthorized)

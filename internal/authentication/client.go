@@ -29,7 +29,11 @@ func InitServiceClient(config *commonConfig.Config) (pb_authentication.Authentic
 }
 
 func (service *ServiceClient) Register(ctx *gin.Context) {
-	logger := commonLogger.GetLoggerFromContext(ctx.Request.Context())
+	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	contextWithCorrelationID, err := commonLogger.TransferCorrelationIDToOutgoingContext(ctx.Request.Context())
 	if err != nil {
 		logger.Error(err, "Error transferring correlation ID to outgoing context")
@@ -41,7 +45,11 @@ func (service *ServiceClient) Register(ctx *gin.Context) {
 }
 
 func (service *ServiceClient) VerifyEmail(ctx *gin.Context) {
-	logger := commonLogger.GetLoggerFromContext(ctx.Request.Context())
+	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	contextWithCorrelationID, err := commonLogger.TransferCorrelationIDToOutgoingContext(ctx.Request.Context())
 	if err != nil {
 		logger.Error(err, "Error transferring correlation ID to outgoing context")
@@ -53,7 +61,11 @@ func (service *ServiceClient) VerifyEmail(ctx *gin.Context) {
 }
 
 func (service *ServiceClient) ResendEmailVerification(ctx *gin.Context) {
-	logger := commonLogger.GetLoggerFromContext(ctx.Request.Context())
+	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	contextWithCorrelationID, err := commonLogger.TransferCorrelationIDToOutgoingContext(ctx.Request.Context())
 	if err != nil {
 		logger.Error(err, "Error transferring correlation ID to outgoing context")

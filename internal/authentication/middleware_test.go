@@ -52,6 +52,38 @@ func createTestContextWithLogger(logger loggerCommon.Loggerer, authHeader *strin
 }
 
 func TestMiddleware(t *testing.T) {
+	// RequestPublicKey
+	t.Run("Request_Public_Key_Error", func(t *testing.T) {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		serviceMock := mock.NewMockServiceClienter(controller)
+		errorExample := errors.New("example error")
+		correlationID := "example-correlation-id"
+
+		serviceMock.EXPECT().GetPublicKey(gomock.Any()).Return(nil, errorExample)
+
+		publicKey, err := RequestPublicKey(serviceMock, correlationID)
+
+		assert.Error(t, err)
+		assert.Nil(t, publicKey)
+		assert.Equal(t, "Could not obtain public key: example error", err.Error())
+	})
+
+	t.Run("Request_Public_Key_Success", func(t *testing.T) {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		serviceMock := mock.NewMockServiceClienter(controller)
+		correlationID := "example-correlation-id"
+		publicKeyExample := "example-key"
+
+		serviceMock.EXPECT().GetPublicKey(gomock.Any()).Return(&publicKeyExample, nil)
+
+		publicKey, err := RequestPublicKey(serviceMock, correlationID)
+
+		assert.Nil(t, err)
+		assert.Equal(t, *publicKey, publicKeyExample)
+	})
+
 	// RequireAuthentication
 	t.Run("RequireAuthentication_No_Logger_Error", func(t *testing.T) {
 		controller := gomock.NewController(t)
@@ -344,38 +376,5 @@ func TestMiddleware(t *testing.T) {
 		authenticationMiddleware.RequireAuthentication(ctx)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-	})
-}
-
-func TestRequestPublicKey(t *testing.T) {
-	t.Run("Request_Public_Key_Error", func(t *testing.T) {
-		controller := gomock.NewController(t)
-		defer controller.Finish()
-		serviceMock := mock.NewMockServiceClienter(controller)
-		errorExample := errors.New("example error")
-		correlationID := "example-correlation-id"
-
-		serviceMock.EXPECT().GetPublicKey(gomock.Any()).Return(nil, errorExample)
-
-		publicKey, err := RequestPublicKey(serviceMock, correlationID)
-
-		assert.Error(t, err)
-		assert.Nil(t, publicKey)
-		assert.Equal(t, "Could not obtain public key: example error", err.Error())
-	})
-
-	t.Run("Request_Public_Key_Success", func(t *testing.T) {
-		controller := gomock.NewController(t)
-		defer controller.Finish()
-		serviceMock := mock.NewMockServiceClienter(controller)
-		correlationID := "example-correlation-id"
-		publicKeyExample := "example-key"
-
-		serviceMock.EXPECT().GetPublicKey(gomock.Any()).Return(&publicKeyExample, nil)
-
-		publicKey, err := RequestPublicKey(serviceMock, correlationID)
-
-		assert.Nil(t, err)
-		assert.Equal(t, *publicKey, publicKeyExample)
 	})
 }

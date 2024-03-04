@@ -1,6 +1,7 @@
 package authentication
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -13,9 +14,18 @@ import (
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
-type ServiceClient struct {
-	Client pb_authentication.AuthenticationServiceClient
+type ServiceClienter interface {
+	GetPublicKey(ctx context.Context) (*string, error)
+	Register(ctx *gin.Context)
+	VerifyEmail(ctx *gin.Context)
+	ResendEmailVerification(ctx *gin.Context)
 }
+
+type ServiceClient struct {
+	client pb_authentication.AuthenticationServiceClient
+}
+
+var _ ServiceClienter = &ServiceClient{}
 
 func InitServiceClient(config *commonConfig.Config) (pb_authentication.AuthenticationServiceClient, error) {
 	grpcServiceAddress := fmt.Sprintf("%s:%s", config.AuthenticationService.Host, config.AuthenticationService.Port)
@@ -26,6 +36,17 @@ func InitServiceClient(config *commonConfig.Config) (pb_authentication.Authentic
 	}
 
 	return pb_authentication.NewAuthenticationServiceClient(clientConnection), nil
+}
+
+func (service *ServiceClient) GetPublicKey(ctx context.Context) (*string, error) {
+	response, err := service.client.GetPublicKey(
+		ctx,
+		&pb_authentication.GetPublicKeyRequest{},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &response.PublicKey, nil
 }
 
 func (service *ServiceClient) Register(ctx *gin.Context) {
@@ -41,7 +62,7 @@ func (service *ServiceClient) Register(ctx *gin.Context) {
 		return
 	}
 	ctx.Request = ctx.Request.WithContext(contextWithCorrelationID)
-	routes.Register(ctx, service.Client)
+	routes.Register(ctx, service.client)
 }
 
 func (service *ServiceClient) VerifyEmail(ctx *gin.Context) {
@@ -57,7 +78,7 @@ func (service *ServiceClient) VerifyEmail(ctx *gin.Context) {
 		return
 	}
 	ctx.Request = ctx.Request.WithContext(contextWithCorrelationID)
-	routes.VerifyEmail(ctx, service.Client)
+	routes.VerifyEmail(ctx, service.client)
 }
 
 func (service *ServiceClient) ResendEmailVerification(ctx *gin.Context) {
@@ -74,5 +95,5 @@ func (service *ServiceClient) ResendEmailVerification(ctx *gin.Context) {
 	}
 
 	ctx.Request = ctx.Request.WithContext(contextWithCorrelationID)
-	routes.ResendEmailVerification(ctx, service.Client)
+	routes.ResendEmailVerification(ctx, service.client)
 }

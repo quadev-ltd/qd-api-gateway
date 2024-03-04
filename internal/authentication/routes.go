@@ -13,7 +13,7 @@ func RegisterRoutes(router *gin.Engine, config *commonConfig.Config) (*ServiceCl
 		return nil, fmt.Errorf("Could not initialize authentication service client: %v", err)
 	}
 	service := &ServiceClient{
-		Client: client,
+		client: client,
 	}
 
 	routes := router.Group("/user")

@@ -11,8 +11,6 @@ import (
 	"github.com/google/uuid"
 	commonJWT "github.com/quadev-ltd/qd-common/pkg/jwt"
 	commonLogger "github.com/quadev-ltd/qd-common/pkg/log"
-
-	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
 type AutheticationMiddlewarer interface {
@@ -20,43 +18,40 @@ type AutheticationMiddlewarer interface {
 }
 
 type AutheticationMiddleware struct {
-	service           *ServiceClient
-	jwtAuthenticator  commonJWT.TokenVerifierer
+	service           ServiceClienter
+	jwtVerifier       commonJWT.TokenVerifierer
 	jwtTokenInspector commonJWT.TokenInspectorer
 }
 
 var _ AutheticationMiddlewarer = &AutheticationMiddleware{}
 
-func InitAuthenticationMiddleware(authenticationService *ServiceClient) (AutheticationMiddlewarer, error) {
+func InitAuthenticationMiddleware(authenticationService ServiceClienter) (AutheticationMiddlewarer, error) {
 	correlationID := uuid.New().String()
 	publicKey, err := RequestPublicKey(authenticationService, correlationID)
 	if err != nil {
 		return nil, err
 	}
-	jwtAuthenticator, err := commonJWT.NewTokenVerifier(*publicKey)
+	jwtVerifier, err := commonJWT.NewTokenVerifier(*publicKey)
 	if err != nil {
 		return nil, err
 	}
 	jwtTokenInspector := &commonJWT.TokenInspector{}
 	return &AutheticationMiddleware{
 		authenticationService,
-		jwtAuthenticator,
+		jwtVerifier,
 		jwtTokenInspector,
 	}, nil
 }
 
-func RequestPublicKey(service *ServiceClient, correlationID string) (*string, error) {
+func RequestPublicKey(service ServiceClienter, correlationID string) (*string, error) {
 	ctx := commonLogger.AddCorrelationIDToOutgoingContext(context.Background(), correlationID)
-	res, err := service.Client.GetPublicKey(
-		ctx,
-		&pb_authentication.GetPublicKeyRequest{},
-	)
+	publicKey, err := service.GetPublicKey(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("Could not obtain public key: %v", err)
 	}
 
-	return &res.PublicKey, nil
+	return publicKey, nil
 }
 
 func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ctx *gin.Context) {
@@ -82,7 +77,7 @@ func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ct
 		return
 	}
 
-	parsedToken, err := autheticationMiddleware.jwtAuthenticator.Verify(token[1])
+	parsedToken, err := autheticationMiddleware.jwtVerifier.Verify(token[1])
 	if err != nil {
 		logger.Error(err, "The bearer token was invalid")
 		ctx.AbortWithStatus(http.StatusUnauthorized)
@@ -108,11 +103,11 @@ func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ct
 	}
 	tokenExpiry, err := autheticationMiddleware.jwtTokenInspector.GetExpiryFromToken(parsedToken)
 	if err != nil {
-		logger.Error(err, "Could not obatain expiry from bearer token")
+		logger.Error(err, "Could not obtain expiry from bearer token")
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	if tokenExpiry.Compare(time.Now()) > 1 {
+	if tokenExpiry.Before(time.Now()) {
 		logger.Error(nil, "The bearer token has expired")
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return

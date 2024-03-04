@@ -20,7 +20,7 @@ type address struct {
 type Config struct {
 	Verbose     bool
 	Environment string
-	AWS         commonAWS.AWSConfig
+	AWS         commonAWS.Config
 }
 
 // Load loads the configuration from the given path yml file

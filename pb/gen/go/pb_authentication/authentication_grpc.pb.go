@@ -24,6 +24,7 @@ const (
 	AuthenticationService_VerifyEmail_FullMethodName             = "/pb_authentication.AuthenticationService/VerifyEmail"
 	AuthenticationService_ResendEmailVerification_FullMethodName = "/pb_authentication.AuthenticationService/ResendEmailVerification"
 	AuthenticationService_Authenticate_FullMethodName            = "/pb_authentication.AuthenticationService/Authenticate"
+	AuthenticationService_RefreshToken_FullMethodName            = "/pb_authentication.AuthenticationService/RefreshToken"
 )
 
 // AuthenticationServiceClient is the client API for AuthenticationService service.
@@ -35,6 +36,7 @@ type AuthenticationServiceClient interface {
 	VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*VerifyEmailResponse, error)
 	ResendEmailVerification(ctx context.Context, in *ResendEmailVerificationRequest, opts ...grpc.CallOption) (*ResendEmailVerificationResponse, error)
 	Authenticate(ctx context.Context, in *AuthenticateRequest, opts ...grpc.CallOption) (*AuthenticateResponse, error)
+	RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*AuthenticateResponse, error)
 }
 
 type authenticationServiceClient struct {
@@ -90,6 +92,15 @@ func (c *authenticationServiceClient) Authenticate(ctx context.Context, in *Auth
 	return out, nil
 }
 
+func (c *authenticationServiceClient) RefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*AuthenticateResponse, error) {
+	out := new(AuthenticateResponse)
+	err := c.cc.Invoke(ctx, AuthenticationService_RefreshToken_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthenticationServiceServer is the server API for AuthenticationService service.
 // All implementations must embed UnimplementedAuthenticationServiceServer
 // for forward compatibility
@@ -99,6 +110,7 @@ type AuthenticationServiceServer interface {
 	VerifyEmail(context.Context, *VerifyEmailRequest) (*VerifyEmailResponse, error)
 	ResendEmailVerification(context.Context, *ResendEmailVerificationRequest) (*ResendEmailVerificationResponse, error)
 	Authenticate(context.Context, *AuthenticateRequest) (*AuthenticateResponse, error)
+	RefreshToken(context.Context, *RefreshTokenRequest) (*AuthenticateResponse, error)
 	mustEmbedUnimplementedAuthenticationServiceServer()
 }
 
@@ -120,6 +132,9 @@ func (UnimplementedAuthenticationServiceServer) ResendEmailVerification(context.
 }
 func (UnimplementedAuthenticationServiceServer) Authenticate(context.Context, *AuthenticateRequest) (*AuthenticateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Authenticate not implemented")
+}
+func (UnimplementedAuthenticationServiceServer) RefreshToken(context.Context, *RefreshTokenRequest) (*AuthenticateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RefreshToken not implemented")
 }
 func (UnimplementedAuthenticationServiceServer) mustEmbedUnimplementedAuthenticationServiceServer() {}
 
@@ -224,6 +239,24 @@ func _AuthenticationService_Authenticate_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthenticationService_RefreshToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthenticationServiceServer).RefreshToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthenticationService_RefreshToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthenticationServiceServer).RefreshToken(ctx, req.(*RefreshTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthenticationService_ServiceDesc is the grpc.ServiceDesc for AuthenticationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -250,6 +283,10 @@ var AuthenticationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Authenticate",
 			Handler:    _AuthenticationService_Authenticate_Handler,
+		},
+		{
+			MethodName: "RefreshToken",
+			Handler:    _AuthenticationService_RefreshToken_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

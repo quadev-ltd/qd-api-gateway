@@ -19,6 +19,8 @@ type ServiceClienter interface {
 	Register(ctx *gin.Context)
 	VerifyEmail(ctx *gin.Context)
 	ResendEmailVerification(ctx *gin.Context)
+	Authenticate(ctx *gin.Context)
+	RefreshToken(ctx *gin.Context)
 }
 
 type ServiceClient struct {
@@ -38,6 +40,22 @@ func InitServiceClient(config *commonConfig.Config) (pb_authentication.Authentic
 	return pb_authentication.NewAuthenticationServiceClient(clientConnection), nil
 }
 
+func transferCorrelationIDToOutgoingContext(ctx *gin.Context) {
+	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	contextWithCorrelationID, err := commonLogger.TransferCorrelationIDToOutgoingContext(ctx.Request.Context())
+	if err != nil {
+		logger.Error(err, "Error transferring correlation ID to outgoing context")
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	logger.Info("Correlation ID successfully transfered to outgoing context")
+	ctx.Request = ctx.Request.WithContext(contextWithCorrelationID)
+}
+
 func (service *ServiceClient) GetPublicKey(ctx context.Context) (*string, error) {
 	response, err := service.client.GetPublicKey(
 		ctx,
@@ -50,50 +68,26 @@ func (service *ServiceClient) GetPublicKey(ctx context.Context) (*string, error)
 }
 
 func (service *ServiceClient) Register(ctx *gin.Context) {
-	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	contextWithCorrelationID, err := commonLogger.TransferCorrelationIDToOutgoingContext(ctx.Request.Context())
-	if err != nil {
-		logger.Error(err, "Error transferring correlation ID to outgoing context")
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	ctx.Request = ctx.Request.WithContext(contextWithCorrelationID)
+	transferCorrelationIDToOutgoingContext(ctx)
 	routes.Register(ctx, service.client)
 }
 
 func (service *ServiceClient) VerifyEmail(ctx *gin.Context) {
-	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	contextWithCorrelationID, err := commonLogger.TransferCorrelationIDToOutgoingContext(ctx.Request.Context())
-	if err != nil {
-		logger.Error(err, "Error transferring correlation ID to outgoing context")
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	ctx.Request = ctx.Request.WithContext(contextWithCorrelationID)
+	transferCorrelationIDToOutgoingContext(ctx)
 	routes.VerifyEmail(ctx, service.client)
 }
 
 func (service *ServiceClient) ResendEmailVerification(ctx *gin.Context) {
-	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	contextWithCorrelationID, err := commonLogger.TransferCorrelationIDToOutgoingContext(ctx.Request.Context())
-	if err != nil {
-		logger.Error(err, "Error transferring correlation ID to outgoing context")
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	ctx.Request = ctx.Request.WithContext(contextWithCorrelationID)
+	transferCorrelationIDToOutgoingContext(ctx)
 	routes.ResendEmailVerification(ctx, service.client)
+}
+
+func (service *ServiceClient) Authenticate(ctx *gin.Context) {
+	transferCorrelationIDToOutgoingContext(ctx)
+	routes.Authenticate(ctx, service.client)
+}
+
+func (service *ServiceClient) RefreshToken(ctx *gin.Context) {
+	transferCorrelationIDToOutgoingContext(ctx)
+	routes.RefreshToken(ctx, service.client)
 }

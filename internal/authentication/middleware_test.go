@@ -243,7 +243,7 @@ func TestMiddleware(t *testing.T) {
 
 		ctx, w := createTestContextWithLogger(loggerMock, &authHeader)
 
-		loggerMock.EXPECT().Error(nil, "The bearer token was not an access token")
+		loggerMock.EXPECT().Error(nil, "The bearer token was not an AccessTokenType")
 		jwtVerifierMock.EXPECT().Verify("test-header").Return(&testToken, nil)
 		jwtTokenInspectorMock.EXPECT().GetTypeFromToken(&testToken).Return(&tokenTypeValue, nil)
 

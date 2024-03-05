@@ -15,6 +15,7 @@ import (
 
 type AutheticationMiddlewarer interface {
 	RequireAuthentication(ctx *gin.Context)
+	RefreshAuthentication(ctx *gin.Context)
 }
 
 type AutheticationMiddleware struct {
@@ -55,6 +56,14 @@ func RequestPublicKey(service ServiceClienter, correlationID string) (*string, e
 }
 
 func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ctx *gin.Context) {
+	autheticationMiddleware.verifyToken(ctx, commonJWT.AccessTokenType)
+}
+
+func (autheticationMiddleware *AutheticationMiddleware) RefreshAuthentication(ctx *gin.Context) {
+	autheticationMiddleware.verifyToken(ctx, commonJWT.RefreshTokenType)
+}
+
+func (autheticationMiddleware *AutheticationMiddleware) verifyToken(ctx *gin.Context, expectedTokenType commonJWT.TokenType) {
 	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
@@ -90,10 +99,13 @@ func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ct
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	if commonJWT.TokenType(*tokenType) != commonJWT.AccessTokenType {
-		logger.Error(nil, "The bearer token was not an access token")
+	if commonJWT.TokenType(*tokenType) != expectedTokenType {
+		logger.Error(nil, fmt.Sprintf("The bearer token was not an %s", expectedTokenType))
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
+	}
+	if expectedTokenType == commonJWT.RefreshTokenType {
+		ctx.Set("token", token[1])
 	}
 	userEmail, err := autheticationMiddleware.jwtTokenInspector.GetEmailFromToken(parsedToken)
 	if err != nil {

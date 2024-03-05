@@ -16,18 +16,23 @@ func RegisterRoutes(router *gin.Engine, config *commonConfig.Config) (*ServiceCl
 		client: client,
 	}
 
-	routes := router.Group("/user")
+	userRoutes := router.Group("/user")
 
-	routes.POST("/", service.Register)
-	routes.GET("/email/:verification_token", service.VerifyEmail)
+	userRoutes.POST("/", service.Register)
+	userRoutes.GET("/email/:verification_token", service.VerifyEmail)
+	userRoutes.POST("/authenticate", service.Authenticate)
 
-	routes = router.Group("/email")
+	emailRoutes := router.Group("/email")
 	authenticationMiddleware, err := InitAuthenticationMiddleware(service)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to initiate authenticator middleware: %v", err)
 	}
-	routes.Use(authenticationMiddleware.RequireAuthentication)
-	routes.POST("/verification", service.ResendEmailVerification)
+	emailRoutes.Use(authenticationMiddleware.RequireAuthentication)
+	emailRoutes.POST("/verification", service.ResendEmailVerification)
+
+	authenticationRoutes := router.Group("/authentication")
+	authenticationRoutes.Use(authenticationMiddleware.RefreshAuthentication)
+	authenticationRoutes.POST("/refresh", service.RefreshToken)
 
 	return service, nil
 }

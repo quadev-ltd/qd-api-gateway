@@ -35,6 +35,18 @@ func (m *MockServiceClienter) EXPECT() *MockServiceClienterMockRecorder {
 	return m.recorder
 }
 
+// Authenticate mocks base method.
+func (m *MockServiceClienter) Authenticate(ctx *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Authenticate", ctx)
+}
+
+// Authenticate indicates an expected call of Authenticate.
+func (mr *MockServiceClienterMockRecorder) Authenticate(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockServiceClienter)(nil).Authenticate), ctx)
+}
+
 // GetPublicKey mocks base method.
 func (m *MockServiceClienter) GetPublicKey(ctx context.Context) (*string, error) {
 	m.ctrl.T.Helper()
@@ -48,6 +60,18 @@ func (m *MockServiceClienter) GetPublicKey(ctx context.Context) (*string, error)
 func (mr *MockServiceClienterMockRecorder) GetPublicKey(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPublicKey", reflect.TypeOf((*MockServiceClienter)(nil).GetPublicKey), ctx)
+}
+
+// RefreshToken mocks base method.
+func (m *MockServiceClienter) RefreshToken(ctx *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "RefreshToken", ctx)
+}
+
+// RefreshToken indicates an expected call of RefreshToken.
+func (mr *MockServiceClienterMockRecorder) RefreshToken(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshToken", reflect.TypeOf((*MockServiceClienter)(nil).RefreshToken), ctx)
 }
 
 // Register mocks base method.

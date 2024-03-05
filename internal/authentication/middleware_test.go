@@ -12,9 +12,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 	"github.com/golang/mock/gomock"
-	jwtCommonMock "github.com/quadev-ltd/qd-common/pkg/jwt/mock"
-	loggerCommon "github.com/quadev-ltd/qd-common/pkg/log"
-	loggerCommonMock "github.com/quadev-ltd/qd-common/pkg/log/mock"
+	commonJWTMock "github.com/quadev-ltd/qd-common/pkg/jwt/mock"
+	commonLogger "github.com/quadev-ltd/qd-common/pkg/log"
+	commonLoggerMock "github.com/quadev-ltd/qd-common/pkg/log/mock"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/authentication/mock"
@@ -43,9 +43,9 @@ func createTestContext(method, path string, body []byte, authHeader *string) (*g
 	return c, w
 }
 
-func createTestContextWithLogger(logger loggerCommon.Loggerer, authHeader *string) (*gin.Context, *httptest.ResponseRecorder) {
+func createTestContextWithLogger(logger commonLogger.Loggerer, authHeader *string) (*gin.Context, *httptest.ResponseRecorder) {
 	ctx, w := createTestContext("GET", "/test", nil, authHeader)
-	newCtx := context.WithValue(ctx.Request.Context(), loggerCommon.LoggerKey, logger)
+	newCtx := context.WithValue(ctx.Request.Context(), commonLogger.LoggerKey, logger)
 	newReq := ctx.Request.WithContext(newCtx)
 	ctx.Request = newReq
 	return ctx, w
@@ -89,8 +89,8 @@ func TestMiddleware(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()
 		serviceMock := mock.NewMockServiceClienter(controller)
-		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
-		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
 		authenticationMiddleware := &AutheticationMiddleware{
 			serviceMock,
 			jwtVerifierMock,
@@ -107,14 +107,14 @@ func TestMiddleware(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()
 		serviceMock := mock.NewMockServiceClienter(controller)
-		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
-		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
 		authenticationMiddleware := &AutheticationMiddleware{
 			serviceMock,
 			jwtVerifierMock,
 			jwtTokenInspectorMock,
 		}
-		loggerMock := loggerCommonMock.NewMockLoggerer(controller)
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
 
 		ctx, w := createTestContextWithLogger(loggerMock, nil)
 
@@ -129,14 +129,14 @@ func TestMiddleware(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()
 		serviceMock := mock.NewMockServiceClienter(controller)
-		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
-		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
 		authenticationMiddleware := &AutheticationMiddleware{
 			serviceMock,
 			jwtVerifierMock,
 			jwtTokenInspectorMock,
 		}
-		loggerMock := loggerCommonMock.NewMockLoggerer(controller)
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
 
 		authHeader := "test-header"
 		ctx, w := createTestContextWithLogger(loggerMock, &authHeader)
@@ -152,14 +152,14 @@ func TestMiddleware(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()
 		serviceMock := mock.NewMockServiceClienter(controller)
-		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
-		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
 		authenticationMiddleware := &AutheticationMiddleware{
 			serviceMock,
 			jwtVerifierMock,
 			jwtTokenInspectorMock,
 		}
-		loggerMock := loggerCommonMock.NewMockLoggerer(controller)
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
 
 		authHeader := "Bearer"
 		ctx, w := createTestContextWithLogger(loggerMock, &authHeader)
@@ -175,14 +175,14 @@ func TestMiddleware(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()
 		serviceMock := mock.NewMockServiceClienter(controller)
-		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
-		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
 		authenticationMiddleware := &AutheticationMiddleware{
 			serviceMock,
 			jwtVerifierMock,
 			jwtTokenInspectorMock,
 		}
-		loggerMock := loggerCommonMock.NewMockLoggerer(controller)
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
 
 		exampleError := errors.New("example error")
 		authHeader := "Bearer invalid-header"
@@ -200,14 +200,14 @@ func TestMiddleware(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()
 		serviceMock := mock.NewMockServiceClienter(controller)
-		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
-		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
 		authenticationMiddleware := &AutheticationMiddleware{
 			serviceMock,
 			jwtVerifierMock,
 			jwtTokenInspectorMock,
 		}
-		loggerMock := loggerCommonMock.NewMockLoggerer(controller)
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
 
 		exampleError := errors.New("example error")
 		authHeader := "Bearer test-header"
@@ -228,14 +228,14 @@ func TestMiddleware(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()
 		serviceMock := mock.NewMockServiceClienter(controller)
-		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
-		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
 		authenticationMiddleware := &AutheticationMiddleware{
 			serviceMock,
 			jwtVerifierMock,
 			jwtTokenInspectorMock,
 		}
-		loggerMock := loggerCommonMock.NewMockLoggerer(controller)
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
 
 		authHeader := "Bearer test-header"
 		testToken := jwt.Token{}
@@ -256,14 +256,14 @@ func TestMiddleware(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()
 		serviceMock := mock.NewMockServiceClienter(controller)
-		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
-		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
 		authenticationMiddleware := &AutheticationMiddleware{
 			serviceMock,
 			jwtVerifierMock,
 			jwtTokenInspectorMock,
 		}
-		loggerMock := loggerCommonMock.NewMockLoggerer(controller)
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
 
 		exampleError := errors.New("example error")
 		authHeader := "Bearer test-header"
@@ -286,14 +286,14 @@ func TestMiddleware(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()
 		serviceMock := mock.NewMockServiceClienter(controller)
-		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
-		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
 		authenticationMiddleware := &AutheticationMiddleware{
 			serviceMock,
 			jwtVerifierMock,
 			jwtTokenInspectorMock,
 		}
-		loggerMock := loggerCommonMock.NewMockLoggerer(controller)
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
 
 		exampleError := errors.New("example error")
 		authHeader := "Bearer test-header"
@@ -318,14 +318,14 @@ func TestMiddleware(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()
 		serviceMock := mock.NewMockServiceClienter(controller)
-		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
-		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
 		authenticationMiddleware := &AutheticationMiddleware{
 			serviceMock,
 			jwtVerifierMock,
 			jwtTokenInspectorMock,
 		}
-		loggerMock := loggerCommonMock.NewMockLoggerer(controller)
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
 
 		authHeader := "Bearer test-header"
 		testToken := jwt.Token{}
@@ -350,14 +350,14 @@ func TestMiddleware(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()
 		serviceMock := mock.NewMockServiceClienter(controller)
-		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
-		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
 		authenticationMiddleware := &AutheticationMiddleware{
 			serviceMock,
 			jwtVerifierMock,
 			jwtTokenInspectorMock,
 		}
-		loggerMock := loggerCommonMock.NewMockLoggerer(controller)
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
 
 		authHeader := "Bearer test-header"
 		testToken := jwt.Token{}
@@ -376,5 +376,34 @@ func TestMiddleware(t *testing.T) {
 		authenticationMiddleware.RequireAuthentication(ctx)
 
 		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	// Refresh Authentication
+	t.Run("RefreshAuthentication_Wrong_Type_Claim_Authorization_Header_Error", func(t *testing.T) {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		serviceMock := mock.NewMockServiceClienter(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
+		authenticationMiddleware := &AutheticationMiddleware{
+			serviceMock,
+			jwtVerifierMock,
+			jwtTokenInspectorMock,
+		}
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
+
+		authHeader := "Bearer test-header"
+		testToken := jwt.Token{}
+		tokenTypeValue := "invalid-type"
+
+		ctx, w := createTestContextWithLogger(loggerMock, &authHeader)
+
+		loggerMock.EXPECT().Error(nil, "The bearer token was not an RefreshTokenType")
+		jwtVerifierMock.EXPECT().Verify("test-header").Return(&testToken, nil)
+		jwtTokenInspectorMock.EXPECT().GetTypeFromToken(&testToken).Return(&tokenTypeValue, nil)
+
+		authenticationMiddleware.RefreshAuthentication(ctx)
+
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
 	})
 }

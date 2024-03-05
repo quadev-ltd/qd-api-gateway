@@ -377,4 +377,33 @@ func TestMiddleware(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
+
+	// Refresh Authentication
+	t.Run("RefreshAuthentication_Wrong_Type_Claim_Authorization_Header_Error", func(t *testing.T) {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		serviceMock := mock.NewMockServiceClienter(controller)
+		jwtVerifierMock := jwtCommonMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := jwtCommonMock.NewMockTokenInspectorer(controller)
+		authenticationMiddleware := &AutheticationMiddleware{
+			serviceMock,
+			jwtVerifierMock,
+			jwtTokenInspectorMock,
+		}
+		loggerMock := loggerCommonMock.NewMockLoggerer(controller)
+
+		authHeader := "Bearer test-header"
+		testToken := jwt.Token{}
+		tokenTypeValue := "invalid-type"
+
+		ctx, w := createTestContextWithLogger(loggerMock, &authHeader)
+
+		loggerMock.EXPECT().Error(nil, "The bearer token was not an RefreshTokenType")
+		jwtVerifierMock.EXPECT().Verify("test-header").Return(&testToken, nil)
+		jwtTokenInspectorMock.EXPECT().GetTypeFromToken(&testToken).Return(&tokenTypeValue, nil)
+
+		authenticationMiddleware.RefreshAuthentication(ctx)
+
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	})
 }

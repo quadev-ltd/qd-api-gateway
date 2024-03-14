@@ -8,12 +8,12 @@ import (
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
-func VerifyEmail(ctx *gin.Context, client pb_authentication.AuthenticationServiceClient) {
-	res, err := client.VerifyEmail(
+func VerifyResetPasswordToken(ctx *gin.Context, client pb_authentication.AuthenticationServiceClient) {
+	res, err := client.VerifyResetPasswordToken(
 		ctx.Request.Context(),
-		&pb_authentication.VerifyEmailRequest{
-			UserId:            ctx.Param("user_id"),
-			VerificationToken: ctx.Param("verification_token"),
+		&pb_authentication.VerifyResetPasswordTokenRequest{
+			UserId: ctx.Param("user_id"),
+			Token:  ctx.Param("verification_token"),
 		},
 	)
 

@@ -16,21 +16,25 @@ func RegisterRoutes(router *gin.Engine, config *commonConfig.Config) (*ServiceCl
 		client: client,
 	}
 
-	userRoutes := router.Group("/user")
-
-	userRoutes.POST("/", service.Register)
-	userRoutes.GET("/email/:verification_token", service.VerifyEmail)
-	userRoutes.POST("/authenticate", service.Authenticate)
-
-	emailRoutes := router.Group("/email")
 	authenticationMiddleware, err := InitAuthenticationMiddleware(service)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to initiate authenticator middleware: %v", err)
 	}
-	emailRoutes.Use(authenticationMiddleware.RequireAuthentication)
-	emailRoutes.POST("/verification", service.ResendEmailVerification)
 
-	authenticationRoutes := router.Group("/authentication")
+	api := router.Group("/api/v1")
+
+	userRoutes := api.Group("/user")
+	userRoutes.POST("/", service.Register)
+	userRoutes.POST("/:user_id/email/:verification_token", service.VerifyEmail)
+	userRoutes.POST("/sessions", service.Authenticate)
+	userRoutes.POST("/email/verification", authenticationMiddleware.RequireAuthentication, service.ResendEmailVerification)
+	userRoutes.POST("/password/reset-request", service.ForgotPassword)
+	userRoutes.GET("/:user_id/password/reset-verification/:verification_token", service.VerifyResetPasswordToken)
+	userRoutes.POST("/:user_id/password/reset/:verification_token", service.ResetPassword)
+	userRoutes.GET("/", authenticationMiddleware.RequireAuthentication, service.GetUserProfile)
+	userRoutes.PUT("/", authenticationMiddleware.RequireAuthentication, service.UpdateUserProfile)
+
+	authenticationRoutes := api.Group("/authentication")
 	authenticationRoutes.Use(authenticationMiddleware.RefreshAuthentication)
 	authenticationRoutes.POST("/refresh", service.RefreshToken)
 

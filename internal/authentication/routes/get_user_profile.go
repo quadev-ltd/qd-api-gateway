@@ -8,10 +8,10 @@ import (
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
-func ResendEmailVerification(ctx *gin.Context, client pb_authentication.AuthenticationServiceClient) {
-	res, err := client.ResendEmailVerification(
+func GetUserProfile(ctx *gin.Context, client pb_authentication.AuthenticationServiceClient) {
+	res, err := client.GetUserProfile(
 		ctx.Request.Context(),
-		&pb_authentication.ResendEmailVerificationRequest{},
+		&pb_authentication.GetUserProfileRequest{},
 	)
 
 	if err != nil {

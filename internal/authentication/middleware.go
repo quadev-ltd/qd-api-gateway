@@ -65,9 +65,15 @@ func (autheticationMiddleware *AutheticationMiddleware) RefreshAuthentication(ct
 }
 
 func ParseAccessToken(ctx *gin.Context) *string {
+	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return nil
+	}
 	authorization := ctx.Request.Header.Get("Authorization")
 
 	if authorization == "" {
+		logger.Error(nil, "No authorization header was present in the request")
 		ctx.AbortWithError(
 			http.StatusForbidden,
 			fmt.Errorf("No authorization header was present in the request"),
@@ -78,6 +84,7 @@ func ParseAccessToken(ctx *gin.Context) *string {
 	token := strings.Split(authorization, "Bearer ")
 
 	if len(token) < 2 {
+		logger.Error(nil, "No bearer token was present in the authorization header")
 		ctx.AbortWithError(
 			http.StatusUnauthorized,
 			fmt.Errorf("No bearer token was present in the authorization header"),
@@ -103,25 +110,16 @@ func (autheticationMiddleware *AutheticationMiddleware) verifyToken(ctx *gin.Con
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-
-	tokenType, err := autheticationMiddleware.jwtTokenInspector.GetTypeFromToken(parsedToken)
-	if err != nil {
-		logger.Error(err, "Could not obtain type from bearer token")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	if commonToken.TokenType(*tokenType) != expectedTokenType {
-		logger.Error(nil, fmt.Sprintf("The bearer token was not an %s", expectedTokenType))
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-	if expectedTokenType == commonToken.RefreshTokenType {
-		ctx.Set("token", parsedAuthorizationToken)
-	}
 	claims, err := autheticationMiddleware.jwtTokenInspector.GetClaimsFromToken(parsedToken)
 	if err != nil {
 		logger.Error(err, "Could not obtain claims from bearer token")
 		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	if commonToken.TokenType(claims.Type) != expectedTokenType {
+		logger.Error(nil, fmt.Sprintf("The bearer token was not an %s", expectedTokenType))
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
 	if claims.Expiry.Before(time.Now()) {

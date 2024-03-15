@@ -3,11 +3,9 @@ package authentication
 import (
 	"context"
 	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	commonConfig "github.com/quadev-ltd/qd-common/pkg/config"
-	commonLogger "github.com/quadev-ltd/qd-common/pkg/log"
 	commonTLS "github.com/quadev-ltd/qd-common/pkg/tls"
 
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/authentication/routes"
@@ -21,6 +19,11 @@ type ServiceClienter interface {
 	ResendEmailVerification(ctx *gin.Context)
 	Authenticate(ctx *gin.Context)
 	RefreshToken(ctx *gin.Context)
+	ForgotPassword(ctx *gin.Context)
+	VerifyResetPasswordToken(ctx *gin.Context)
+	ResetPassword(ctx *gin.Context)
+	GetUserProfile(ctx *gin.Context)
+	UpdateUserProfile(ctx *gin.Context)
 }
 
 type ServiceClient struct {
@@ -40,22 +43,6 @@ func InitServiceClient(config *commonConfig.Config) (pb_authentication.Authentic
 	return pb_authentication.NewAuthenticationServiceClient(clientConnection), nil
 }
 
-func transferCorrelationIDToOutgoingContext(ctx *gin.Context) {
-	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	contextWithCorrelationID, err := commonLogger.TransferCorrelationIDToOutgoingContext(ctx.Request.Context())
-	if err != nil {
-		logger.Error(err, "Error transferring correlation ID to outgoing context")
-		ctx.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	logger.Info("Correlation ID successfully transfered to outgoing context")
-	ctx.Request = ctx.Request.WithContext(contextWithCorrelationID)
-}
-
 func (service *ServiceClient) GetPublicKey(ctx context.Context) (*string, error) {
 	response, err := service.client.GetPublicKey(
 		ctx,
@@ -68,26 +55,41 @@ func (service *ServiceClient) GetPublicKey(ctx context.Context) (*string, error)
 }
 
 func (service *ServiceClient) Register(ctx *gin.Context) {
-	transferCorrelationIDToOutgoingContext(ctx)
 	routes.Register(ctx, service.client)
 }
 
 func (service *ServiceClient) VerifyEmail(ctx *gin.Context) {
-	transferCorrelationIDToOutgoingContext(ctx)
 	routes.VerifyEmail(ctx, service.client)
 }
 
 func (service *ServiceClient) ResendEmailVerification(ctx *gin.Context) {
-	transferCorrelationIDToOutgoingContext(ctx)
 	routes.ResendEmailVerification(ctx, service.client)
 }
 
 func (service *ServiceClient) Authenticate(ctx *gin.Context) {
-	transferCorrelationIDToOutgoingContext(ctx)
 	routes.Authenticate(ctx, service.client)
 }
 
 func (service *ServiceClient) RefreshToken(ctx *gin.Context) {
-	transferCorrelationIDToOutgoingContext(ctx)
 	routes.RefreshToken(ctx, service.client)
+}
+
+func (service *ServiceClient) ForgotPassword(ctx *gin.Context) {
+	routes.ForgotPassword(ctx, service.client)
+}
+
+func (service *ServiceClient) VerifyResetPasswordToken(ctx *gin.Context) {
+	routes.VerifyResetPasswordToken(ctx, service.client)
+}
+
+func (service *ServiceClient) ResetPassword(ctx *gin.Context) {
+	routes.ResetPassword(ctx, service.client)
+}
+
+func (service *ServiceClient) GetUserProfile(ctx *gin.Context) {
+	routes.GetUserProfile(ctx, service.client)
+}
+
+func (service *ServiceClient) UpdateUserProfile(ctx *gin.Context) {
+	routes.UpdateUserProfile(ctx, service.client)
 }

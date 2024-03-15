@@ -36,13 +36,6 @@ func main() {
 	if err != nil {
 		log.Fatalln("Failed to register authentication routes", err)
 	}
-	// // TODO: Add authentication middleware logic in routes which need to authenticate the user jwt
-	// authenticationMiddleware, err := authentication.InitAuthenticationMiddleware(authenticationService)
-	// if err != nil {
-	// 	log.Fatalln("Failed to initiate authenticator middleware", err)
-	// }
-	// product.RegisterRoutes(router, &config, authSvc)
-	// order.RegisterRoutes(router, &config, &authSvc)
 
 	router.Run(fmt.Sprintf("%s:%s", centralConfig.GatewayService.Host, centralConfig.GatewayService.Port))
 }

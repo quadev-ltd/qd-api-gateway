@@ -47,6 +47,18 @@ func (mr *MockServiceClienterMockRecorder) Authenticate(ctx interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockServiceClienter)(nil).Authenticate), ctx)
 }
 
+// ForgotPassword mocks base method.
+func (m *MockServiceClienter) ForgotPassword(ctx *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "ForgotPassword", ctx)
+}
+
+// ForgotPassword indicates an expected call of ForgotPassword.
+func (mr *MockServiceClienterMockRecorder) ForgotPassword(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ForgotPassword", reflect.TypeOf((*MockServiceClienter)(nil).ForgotPassword), ctx)
+}
+
 // GetPublicKey mocks base method.
 func (m *MockServiceClienter) GetPublicKey(ctx context.Context) (*string, error) {
 	m.ctrl.T.Helper()
@@ -60,6 +72,18 @@ func (m *MockServiceClienter) GetPublicKey(ctx context.Context) (*string, error)
 func (mr *MockServiceClienterMockRecorder) GetPublicKey(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPublicKey", reflect.TypeOf((*MockServiceClienter)(nil).GetPublicKey), ctx)
+}
+
+// GetUserProfile mocks base method.
+func (m *MockServiceClienter) GetUserProfile(ctx *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "GetUserProfile", ctx)
+}
+
+// GetUserProfile indicates an expected call of GetUserProfile.
+func (mr *MockServiceClienterMockRecorder) GetUserProfile(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserProfile", reflect.TypeOf((*MockServiceClienter)(nil).GetUserProfile), ctx)
 }
 
 // RefreshToken mocks base method.
@@ -98,6 +122,30 @@ func (mr *MockServiceClienterMockRecorder) ResendEmailVerification(ctx interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResendEmailVerification", reflect.TypeOf((*MockServiceClienter)(nil).ResendEmailVerification), ctx)
 }
 
+// ResetPassword mocks base method.
+func (m *MockServiceClienter) ResetPassword(ctx *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "ResetPassword", ctx)
+}
+
+// ResetPassword indicates an expected call of ResetPassword.
+func (mr *MockServiceClienterMockRecorder) ResetPassword(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetPassword", reflect.TypeOf((*MockServiceClienter)(nil).ResetPassword), ctx)
+}
+
+// UpdateUserProfile mocks base method.
+func (m *MockServiceClienter) UpdateUserProfile(ctx *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "UpdateUserProfile", ctx)
+}
+
+// UpdateUserProfile indicates an expected call of UpdateUserProfile.
+func (mr *MockServiceClienterMockRecorder) UpdateUserProfile(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserProfile", reflect.TypeOf((*MockServiceClienter)(nil).UpdateUserProfile), ctx)
+}
+
 // VerifyEmail mocks base method.
 func (m *MockServiceClienter) VerifyEmail(ctx *gin.Context) {
 	m.ctrl.T.Helper()
@@ -108,4 +156,16 @@ func (m *MockServiceClienter) VerifyEmail(ctx *gin.Context) {
 func (mr *MockServiceClienterMockRecorder) VerifyEmail(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyEmail", reflect.TypeOf((*MockServiceClienter)(nil).VerifyEmail), ctx)
+}
+
+// VerifyResetPasswordToken mocks base method.
+func (m *MockServiceClienter) VerifyResetPasswordToken(ctx *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "VerifyResetPasswordToken", ctx)
+}
+
+// VerifyResetPasswordToken indicates an expected call of VerifyResetPasswordToken.
+func (mr *MockServiceClienterMockRecorder) VerifyResetPasswordToken(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyResetPasswordToken", reflect.TypeOf((*MockServiceClienter)(nil).VerifyResetPasswordToken), ctx)
 }

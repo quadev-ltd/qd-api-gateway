@@ -257,36 +257,6 @@ func TestMiddleware(t *testing.T) {
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
 	})
 
-	// t.Run("RequireAuthentication_Email_Claim_Authorization_Header_Error", func(t *testing.T) {
-	// 	controller := gomock.NewController(t)
-	// 	defer controller.Finish()
-	// 	serviceMock := mock.NewMockServiceClienter(controller)
-	// 	jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
-	// 	jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
-	// 	authenticationMiddleware := &AutheticationMiddleware{
-	// 		serviceMock,
-	// 		jwtVerifierMock,
-	// 		jwtTokenInspectorMock,
-	// 	}
-	// 	loggerMock := commonLoggerMock.NewMockLoggerer(controller)
-
-	// 	exampleError := errors.New("example error")
-	// 	authHeader := "Bearer test-header"
-	// 	testToken := jwt.Token{}
-	// 	tokenTypeValue := "AccessTokenType"
-
-	// 	ctx, w := createTestContextWithLogger(loggerMock, &authHeader)
-
-	// 	loggerMock.EXPECT().Error(exampleError, "Could not obtain email from bearer token")
-	// 	jwtVerifierMock.EXPECT().Verify("test-header").Return(&testToken, nil)
-	// 	jwtTokenInspectorMock.EXPECT().GetTypeFromToken(&testToken).Return(&tokenTypeValue, nil)
-	// 	jwtTokenInspectorMock.EXPECT().GetEmailFromToken(&testToken).Return(nil, exampleError)
-
-	// 	authenticationMiddleware.RequireAuthentication(ctx)
-
-	// 	assert.Equal(t, http.StatusUnauthorized, w.Code)
-	// })
-
 	t.Run("RequireAuthentication_Expiry_Claim_Authorization_Header_Error", func(t *testing.T) {
 		controller := gomock.NewController(t)
 		defer controller.Finish()

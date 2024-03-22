@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/util"
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
@@ -27,7 +28,9 @@ func ForgotPassword(ctx *gin.Context, client pb_authentication.AuthenticationSer
 	)
 
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadGateway, err)
+		errorHttpStatusCode := util.GRPCErrorToHTTPStatus(err)
+		ctx.JSON(errorHttpStatusCode, gin.H{"error": err.Error()})
+		ctx.AbortWithError(errorHttpStatusCode, err)
 		return
 	}
 

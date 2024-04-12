@@ -5,14 +5,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/util"
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
+// ForgotPasswordRequestBody is the request body for the ForgotPassword route
 type ForgotPasswordRequestBody struct {
 	Email string `json:"email" required:"true"`
 }
 
+// ForgotPassword requests a password reset email
 func ForgotPassword(ctx *gin.Context, client pb_authentication.AuthenticationServiceClient) {
 	body := ForgotPasswordRequestBody{}
 
@@ -28,9 +30,9 @@ func ForgotPassword(ctx *gin.Context, client pb_authentication.AuthenticationSer
 	)
 
 	if err != nil {
-		errorHttpStatusCode := util.GRPCErrorToHTTPStatus(err)
-		ctx.JSON(errorHttpStatusCode, gin.H{"error": err.Error()})
-		ctx.AbortWithError(errorHttpStatusCode, err)
+		errorHTTPStatusCode := errors.GRPCErrorToHTTPStatus(err)
+		ctx.JSON(errorHTTPStatusCode, gin.H{"error": err.Error()})
+		ctx.AbortWithError(errorHTTPStatusCode, err)
 		return
 	}
 

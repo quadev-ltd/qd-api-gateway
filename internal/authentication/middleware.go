@@ -14,11 +14,13 @@ import (
 	commonToken "github.com/quadev-ltd/qd-common/pkg/token"
 )
 
+// AutheticationMiddlewarer interface is used to verify JWT tokens
 type AutheticationMiddlewarer interface {
 	RequireAuthentication(ctx *gin.Context)
 	RefreshAuthentication(ctx *gin.Context)
 }
 
+// AutheticationMiddleware is used to verify JWT tokens
 type AutheticationMiddleware struct {
 	service           ServiceClienter
 	jwtVerifier       commonJWT.TokenVerifierer
@@ -27,6 +29,7 @@ type AutheticationMiddleware struct {
 
 var _ AutheticationMiddlewarer = &AutheticationMiddleware{}
 
+// InitAuthenticationMiddleware initializes the authentication middleware
 func InitAuthenticationMiddleware(authenticationService ServiceClienter) (AutheticationMiddlewarer, error) {
 	correlationID := uuid.New().String()
 	publicKey, err := RequestPublicKey(authenticationService, correlationID)
@@ -45,6 +48,7 @@ func InitAuthenticationMiddleware(authenticationService ServiceClienter) (Authet
 	}, nil
 }
 
+// RequestPublicKey requests the public key from the authentication service
 func RequestPublicKey(service ServiceClienter, correlationID string) (*string, error) {
 	ctx := commonLogger.AddCorrelationIDToOutgoingContext(context.Background(), correlationID)
 	publicKey, err := service.GetPublicKey(ctx)
@@ -56,14 +60,17 @@ func RequestPublicKey(service ServiceClienter, correlationID string) (*string, e
 	return publicKey, nil
 }
 
+// RequireAuthentication verifies the access token
 func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ctx *gin.Context) {
 	autheticationMiddleware.verifyToken(ctx, commonToken.AccessTokenType)
 }
 
+// RefreshAuthentication verifies the refresh token
 func (autheticationMiddleware *AutheticationMiddleware) RefreshAuthentication(ctx *gin.Context) {
 	autheticationMiddleware.verifyToken(ctx, commonToken.RefreshTokenType)
 }
 
+// ParseAccessToken parses the access token from the request
 func ParseAccessToken(ctx *gin.Context) *string {
 	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
 	if err != nil {

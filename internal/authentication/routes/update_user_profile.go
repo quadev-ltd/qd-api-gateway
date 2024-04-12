@@ -7,15 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
+// UpdateUserProfileRequestBody is the request body for the UpdateUserProfile route
 type UpdateUserProfileRequestBody struct {
 	FirstName   string `json:"first_name"`
 	LastName    string `json:"last_name"`
 	DateOfBirth *int64 `json:"date_of_birth,omitempty"`
 }
 
+// UpdateUserProfile updates a user's profile
 func UpdateUserProfile(ctx *gin.Context, client pb_authentication.AuthenticationServiceClient) {
 	body := UpdateUserProfileRequestBody{}
 
@@ -36,7 +39,9 @@ func UpdateUserProfile(ctx *gin.Context, client pb_authentication.Authentication
 	)
 
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadGateway, err)
+		errorHTTPStatusCode := errors.GRPCErrorToHTTPStatus(err)
+		ctx.JSON(errorHTTPStatusCode, gin.H{"error": err.Error()})
+		ctx.AbortWithError(errorHTTPStatusCode, err)
 		return
 	}
 

@@ -7,6 +7,7 @@ import (
 	commonConfig "github.com/quadev-ltd/qd-common/pkg/config"
 )
 
+// RegisterRoutes registers the authentication routes
 func RegisterRoutes(router *gin.Engine, config *commonConfig.Config) (*ServiceClient, error) {
 	client, err := InitServiceClient(config)
 	if err != nil {

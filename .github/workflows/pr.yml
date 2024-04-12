@@ -62,8 +62,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           mask-password: true
           registry-type: private
-          skip-logout: false    
-          region: eu-west-1
+          skip-logout: false
 
       - name: Build Docker image
         run: |

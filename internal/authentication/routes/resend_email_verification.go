@@ -17,9 +17,7 @@ func ResendEmailVerification(ctx *gin.Context, client pb_authentication.Authenti
 	)
 
 	if err != nil {
-		errorHTTPStatusCode := errors.GRPCErrorToHTTPStatus(err)
-		ctx.JSON(errorHTTPStatusCode, gin.H{"error": err.Error()})
-		ctx.AbortWithError(errorHTTPStatusCode, err)
+		errors.HandleError(ctx, err)
 		return
 	}
 

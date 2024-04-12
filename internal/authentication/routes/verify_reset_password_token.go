@@ -5,10 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/util"
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
+// VerifyResetPasswordToken verifies a reset password token
 func VerifyResetPasswordToken(ctx *gin.Context, client pb_authentication.AuthenticationServiceClient) {
 	res, err := client.VerifyResetPasswordToken(
 		ctx.Request.Context(),
@@ -19,9 +20,7 @@ func VerifyResetPasswordToken(ctx *gin.Context, client pb_authentication.Authent
 	)
 
 	if err != nil {
-		errorHttpStatusCode := util.GRPCErrorToHTTPStatus(err)
-		ctx.JSON(errorHttpStatusCode, gin.H{"error": err.Error()})
-		ctx.AbortWithError(errorHttpStatusCode, err)
+		errors.HandleError(ctx, err)
 		return
 	}
 

@@ -5,14 +5,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/util"
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
+// RefreshTokentBody is the request body for the RefreshToken route
 type RefreshTokentBody struct {
 	Token string `json:"token"`
 }
 
+// RefreshToken refreshes a user's token
 func RefreshToken(
 	ctx *gin.Context,
 	client pb_authentication.AuthenticationServiceClient,
@@ -23,9 +25,7 @@ func RefreshToken(
 	)
 
 	if err != nil {
-		errorHttpStatusCode := util.GRPCErrorToHTTPStatus(err)
-		ctx.JSON(errorHttpStatusCode, gin.H{"error": err.Error()})
-		ctx.AbortWithError(errorHttpStatusCode, err)
+		errors.HandleError(ctx, err)
 		return
 	}
 

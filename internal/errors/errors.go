@@ -1,12 +1,15 @@
-package util
+package errors
 
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+	commonPB "github.com/quadev-ltd/qd-common/pkg/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
+// GRPCErrorToHTTPStatus converts a gRPC error to an HTTP status code
 func GRPCErrorToHTTPStatus(err error) int {
 	st, ok := status.FromError(err)
 	if !ok {
@@ -50,4 +53,24 @@ func GRPCErrorToHTTPStatus(err error) int {
 	default:
 		return http.StatusInternalServerError
 	}
+}
+
+// HandleError handles an error by returning an HTTP response with the appropriate status code
+func HandleError(ctx *gin.Context, err error) error {
+	errorHTTPStatusCode := GRPCErrorToHTTPStatus(err)
+	errorsMap := gin.H{"error": err.Error()}
+
+	fieldValidationErrors, parsingError := commonPB.GetFieldValidationErrors(err)
+	if parsingError != nil {
+		ctx.JSON(errorHTTPStatusCode, errorsMap)
+		ctx.AbortWithError(errorHTTPStatusCode, err)
+		return parsingError
+	}
+
+	if len(fieldValidationErrors) > 0 {
+		errorsMap["field_errors"] = fieldValidationErrors
+	}
+	ctx.JSON(errorHTTPStatusCode, errorsMap)
+	ctx.AbortWithError(errorHTTPStatusCode, err)
+	return nil
 }

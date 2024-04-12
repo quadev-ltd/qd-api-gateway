@@ -12,6 +12,7 @@ import (
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
+// ServiceClienter is an interface for the authentication service client
 type ServiceClienter interface {
 	GetPublicKey(ctx context.Context) (*string, error)
 	Register(ctx *gin.Context)
@@ -26,12 +27,14 @@ type ServiceClienter interface {
 	UpdateUserProfile(ctx *gin.Context)
 }
 
+// ServiceClient is a struct for the authentication service client
 type ServiceClient struct {
 	client pb_authentication.AuthenticationServiceClient
 }
 
 var _ ServiceClienter = &ServiceClient{}
 
+// InitServiceClient initializes the authentication service client
 func InitServiceClient(config *commonConfig.Config) (pb_authentication.AuthenticationServiceClient, error) {
 	grpcServiceAddress := fmt.Sprintf("%s:%s", config.AuthenticationService.Host, config.AuthenticationService.Port)
 
@@ -43,6 +46,7 @@ func InitServiceClient(config *commonConfig.Config) (pb_authentication.Authentic
 	return pb_authentication.NewAuthenticationServiceClient(clientConnection), nil
 }
 
+// GetPublicKey gets the public key from server
 func (service *ServiceClient) GetPublicKey(ctx context.Context) (*string, error) {
 	response, err := service.client.GetPublicKey(
 		ctx,
@@ -54,42 +58,52 @@ func (service *ServiceClient) GetPublicKey(ctx context.Context) (*string, error)
 	return &response.PublicKey, nil
 }
 
+// Register redirects request to the register route
 func (service *ServiceClient) Register(ctx *gin.Context) {
 	routes.Register(ctx, service.client)
 }
 
+// VerifyEmail redirects request to the verify email route
 func (service *ServiceClient) VerifyEmail(ctx *gin.Context) {
 	routes.VerifyEmail(ctx, service.client)
 }
 
+// ResendEmailVerification redirects request to the resend email verification route
 func (service *ServiceClient) ResendEmailVerification(ctx *gin.Context) {
 	routes.ResendEmailVerification(ctx, service.client)
 }
 
+// Authenticate redirects request to the authenticate route
 func (service *ServiceClient) Authenticate(ctx *gin.Context) {
 	routes.Authenticate(ctx, service.client)
 }
 
+// RefreshToken redirects request to the refresh token route
 func (service *ServiceClient) RefreshToken(ctx *gin.Context) {
 	routes.RefreshToken(ctx, service.client)
 }
 
+// ForgotPassword redirects request to	the forgot password route
 func (service *ServiceClient) ForgotPassword(ctx *gin.Context) {
 	routes.ForgotPassword(ctx, service.client)
 }
 
+// VerifyResetPasswordToken redirects request to the verify reset password token route
 func (service *ServiceClient) VerifyResetPasswordToken(ctx *gin.Context) {
 	routes.VerifyResetPasswordToken(ctx, service.client)
 }
 
+// ResetPassword redirects request to the reset password route
 func (service *ServiceClient) ResetPassword(ctx *gin.Context) {
 	routes.ResetPassword(ctx, service.client)
 }
 
+// GetUserProfile redirects request to the get user profile route
 func (service *ServiceClient) GetUserProfile(ctx *gin.Context) {
 	routes.GetUserProfile(ctx, service.client)
 }
 
+// UpdateUserProfile redirects request to the update user profile route
 func (service *ServiceClient) UpdateUserProfile(ctx *gin.Context) {
 	routes.UpdateUserProfile(ctx, service.client)
 }

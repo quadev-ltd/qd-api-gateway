@@ -5,14 +5,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/util"
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
+// ResetPasswordRequestBody is the request body for the ResetPassword route
 type ResetPasswordRequestBody struct {
 	Password string `json:"password" required:"true"`
 }
 
+// ResetPassword resets a user's password
 func ResetPassword(ctx *gin.Context, client pb_authentication.AuthenticationServiceClient) {
 	body := ResetPasswordRequestBody{}
 	if err := ctx.BindJSON(&body); err != nil {
@@ -29,9 +31,7 @@ func ResetPassword(ctx *gin.Context, client pb_authentication.AuthenticationServ
 	)
 
 	if err != nil {
-		errorHttpStatusCode := util.GRPCErrorToHTTPStatus(err)
-		ctx.JSON(errorHttpStatusCode, gin.H{"error": err.Error()})
-		ctx.AbortWithError(errorHttpStatusCode, err)
+		errors.HandleError(ctx, err)
 		return
 	}
 

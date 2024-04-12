@@ -5,15 +5,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/util"
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
 	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
+// AuthenticateRequestBody is the request body for the Authenticate route
 type AuthenticateRequestBody struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
+// Authenticate authenticates a user
 func Authenticate(ctx *gin.Context, client pb_authentication.AuthenticationServiceClient) {
 	body := AuthenticateRequestBody{}
 
@@ -28,9 +30,7 @@ func Authenticate(ctx *gin.Context, client pb_authentication.AuthenticationServi
 	})
 
 	if err != nil {
-		errorHttpStatusCode := util.GRPCErrorToHTTPStatus(err)
-		ctx.JSON(errorHttpStatusCode, gin.H{"error": err.Error()})
-		ctx.AbortWithError(errorHttpStatusCode, err)
+		errors.HandleError(ctx, err)
 		return
 	}
 

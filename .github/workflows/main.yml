@@ -21,13 +21,13 @@ jobs:
         run: go mod download
 
       - name: Run Go Format Check
-        run: gofmt -s -l . | tee /dev/stderr | (! read)
+        run: set -e; gofmt -s -l . | tee /dev/stderr
 
       - name: Run Go Import Check
-        run: goimports -l . | tee /dev/stderr | (! read)
+        run: set -e; goimports -l . | tee /dev/stderr
 
       - name: Run Go Lint
-        run: golint ./...
+        run: set -e; golint ./...
 
       - name: Add proto files
         run: |

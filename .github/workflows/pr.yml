@@ -1,12 +1,12 @@
 name: Go CI/CD
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
 jobs:
-  sanity-check:
+  build:
     name: Build and Test
     runs-on: ubuntu-20.04
     container: tavoargento/quadev-go-service:0.0.1  # Specify the Docker image
@@ -43,7 +43,7 @@ jobs:
         run: go build cmd/main.go
 
   build-and-push:
-    needs: sanity-check
+    needs: build
     runs-on: ubuntu-latest
         
     steps:
@@ -64,9 +64,9 @@ jobs:
       - name: Build Docker image
         run: |
           docker buildx build \
-            --file Dockerfile \
-            --tag 116203835544.dkr.ecr.eu-west-1.amazonaws.com/test.qd-api-gateway:0.0.0 \
-            --output type=image,push=true .
+          --file Dockerfile \
+          --tag 116203835544.dkr.ecr.eu-west-1.amazonaws.com/test.qd-api-gateway:0.0.0 \
+          --output type=image,push=true .
 
       - name: Cleanup
         run: |

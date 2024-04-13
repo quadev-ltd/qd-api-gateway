@@ -54,6 +54,8 @@ func (config *Config) Load(path string) error {
 		return fmt.Errorf("Error unmarshaling configuration: %v", err)
 	}
 
+	fmt.Println("Config:", config)
+
 	if os.Getenv(commonConfig.VerboseKey) == "true" {
 		config.Verbose = true
 	} else {

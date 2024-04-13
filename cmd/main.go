@@ -34,7 +34,7 @@ func main() {
 
 	_, err = authentication.RegisterRoutes(router, &centralConfig)
 	if err != nil {
-		log.Fatalln("Failed to register authentication routes", err)
+		log.Fatalln("Failed to register authentication routes: ", err)
 	}
 
 	router.Run(fmt.Sprintf("%s:%s", centralConfig.GatewayService.Host, centralConfig.GatewayService.Port))

@@ -31,6 +31,8 @@ func (config *Config) Load(path string) error {
 	}
 	config.Environment = env
 
+	log.Info().Msgf("Loading configuration for environment: %s", env)
+
 	// Set the file name of the configurations file (if any)
 	viper.SetConfigName(fmt.Sprintf("config.%s", env))
 	viper.SetConfigType("yml")

@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/quadev-ltd/qd-common/pb/gen/go/pb_authentication"
 	commonConfig "github.com/quadev-ltd/qd-common/pkg/config"
 	commonTLS "github.com/quadev-ltd/qd-common/pkg/tls"
 
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/authentication/routes"
-	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
 // ServiceClienter is an interface for the authentication service client
@@ -38,6 +38,7 @@ var _ ServiceClienter = &ServiceClient{}
 func InitServiceClient(config *commonConfig.Config) (pb_authentication.AuthenticationServiceClient, error) {
 	grpcServiceAddress := fmt.Sprintf("%s:%s", config.AuthenticationService.Host, config.AuthenticationService.Port)
 
+	fmt.Println("Connecting to authentication service at", grpcServiceAddress, config.TLSEnabled)
 	clientConnection, err := commonTLS.CreateGRPCConnection(grpcServiceAddress, config.TLSEnabled)
 	if err != nil {
 		return nil, fmt.Errorf("Could not connect to grpc authentication service: %v", err)

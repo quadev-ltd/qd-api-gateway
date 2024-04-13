@@ -3,6 +3,7 @@ package authentication
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -12,6 +13,8 @@ import (
 	commonJWT "github.com/quadev-ltd/qd-common/pkg/jwt"
 	commonLogger "github.com/quadev-ltd/qd-common/pkg/log"
 	commonToken "github.com/quadev-ltd/qd-common/pkg/token"
+
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/config"
 )
 
 // AutheticationMiddlewarer interface is used to verify JWT tokens
@@ -30,9 +33,9 @@ type AutheticationMiddleware struct {
 var _ AutheticationMiddlewarer = &AutheticationMiddleware{}
 
 // InitAuthenticationMiddleware initializes the authentication middleware
-func InitAuthenticationMiddleware(authenticationService ServiceClienter) (AutheticationMiddlewarer, error) {
+func InitAuthenticationMiddleware(authenticationService ServiceClienter, configurations *config.Config) (AutheticationMiddlewarer, error) {
 	correlationID := uuid.New().String()
-	publicKey, err := RequestPublicKey(authenticationService, correlationID)
+	publicKey, err := RequestPublicKey(authenticationService, correlationID, configurations.Environment, backoffDelay)
 	if err != nil {
 		return nil, err
 	}
@@ -48,16 +51,44 @@ func InitAuthenticationMiddleware(authenticationService ServiceClienter) (Authet
 	}, nil
 }
 
-// RequestPublicKey requests the public key from the authentication service
-func RequestPublicKey(service ServiceClienter, correlationID string) (*string, error) {
-	ctx := commonLogger.AddCorrelationIDToOutgoingContext(context.Background(), correlationID)
-	publicKey, err := service.GetPublicKey(ctx)
+type BackoffStrategy func(attempt int) time.Duration
 
-	if err != nil {
-		return nil, fmt.Errorf("Could not obtain public key: %v", err)
+// backoffDelay calculates the delay for the current retry attempt.
+func backoffDelay(attempt int) time.Duration {
+	const maxDelay = 30 * time.Second
+	delay := time.Duration(math.Pow(2, float64(attempt))) * time.Second
+	if delay > maxDelay {
+		delay = maxDelay
+	}
+	return delay
+}
+
+// RequestPublicKey requests the public key from the authentication service
+func RequestPublicKey(
+	service ServiceClienter,
+	correlationID,
+	environment string,
+	backoff BackoffStrategy,
+) (*string, error) {
+	logFactory := commonLogger.NewLogFactory(environment)
+	logger := logFactory.NewLogger()
+	var publicKey *string
+	var err error
+
+	maxAttempts := 5
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		ctx := commonLogger.AddCorrelationIDToOutgoingContext(context.Background(), correlationID)
+		publicKey, err = service.GetPublicKey(ctx)
+
+		if err == nil {
+			return publicKey, nil
+		}
+
+		logger.Info(fmt.Sprintf("Attempt %d: could not obtain public key, error: %v\n", attempt, err))
+		time.Sleep(backoff(attempt))
 	}
 
-	return publicKey, nil
+	return nil, fmt.Errorf("Could not obtain public key after %d attempts: %v", maxAttempts, err)
 }
 
 // RequireAuthentication verifies the access token

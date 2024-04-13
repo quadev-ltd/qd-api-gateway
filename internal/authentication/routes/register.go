@@ -5,10 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/quadev-ltd/qd-common/pb/gen/go/pb_authentication"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
-	"github.com/quadev-ltd/qd-qpi-gateway/pb/gen/go/pb_authentication"
 )
 
 // RegisterRequestBody is the request body for the Register route

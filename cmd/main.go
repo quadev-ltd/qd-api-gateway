@@ -32,9 +32,9 @@ func main() {
 	logger := commonLogger.NewLogFactory(configuration.Environment)
 	router.Use(commonLogger.CreateGinLoggerMiddleware(logger))
 
-	_, err = authentication.RegisterRoutes(router, &centralConfig)
+	_, err = authentication.RegisterRoutes(router, &centralConfig, &configuration)
 	if err != nil {
-		log.Fatalln("Failed to register authentication routes", err)
+		log.Fatalln("Failed to register authentication routes: ", err)
 	}
 
 	router.Run(fmt.Sprintf("%s:%s", centralConfig.GatewayService.Host, centralConfig.GatewayService.Port))

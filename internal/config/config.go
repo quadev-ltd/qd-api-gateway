@@ -31,6 +31,17 @@ func (config *Config) Load(path string) error {
 	}
 	config.Environment = env
 
+	log.Info().Msgf("Loading configuration for environment: %s", env)
+
+	// Load base configuration file first
+	viper.SetConfigType("yml")
+	viper.AddConfigPath(path)
+	viper.SetConfigName("config.template")
+	err := viper.MergeInConfig()
+	if err != nil {
+		log.Warn().Msgf("Error loading base configuration file: %v", err)
+	}
+
 	// Set the file name of the configurations file (if any)
 	viper.SetConfigName(fmt.Sprintf("config.%s", env))
 	viper.SetConfigType("yml")
@@ -43,7 +54,7 @@ func (config *Config) Load(path string) error {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_")) // Replace dots with underscores in env var names
 
 	// Read the configuration file
-	err := viper.ReadInConfig()
+	err = viper.MergeInConfig()
 	if err != nil {
 		log.Err(fmt.Errorf("Error loading configuration file: %v", err))
 	}

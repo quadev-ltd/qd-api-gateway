@@ -53,7 +53,13 @@ func createTestContextWithLogger(logger commonLogger.Loggerer, authHeader *strin
 	return ctx, w
 }
 
+func fastBackoff(attempt int) time.Duration {
+	return 10 * time.Millisecond // or time.Duration(0) for no delay
+}
+
 func TestMiddleware(t *testing.T) {
+	environment := "Test"
+
 	// RequestPublicKey
 	t.Run("Request_Public_Key_Error", func(t *testing.T) {
 		controller := gomock.NewController(t)
@@ -62,13 +68,13 @@ func TestMiddleware(t *testing.T) {
 		errorExample := errors.New("example error")
 		correlationID := "example-correlation-id"
 
-		serviceMock.EXPECT().GetPublicKey(gomock.Any()).Return(nil, errorExample)
+		serviceMock.EXPECT().GetPublicKey(gomock.Any()).Return(nil, errorExample).Times(5)
 
-		publicKey, err := RequestPublicKey(serviceMock, correlationID)
+		publicKey, err := RequestPublicKey(serviceMock, correlationID, environment, fastBackoff)
 
 		assert.Error(t, err)
 		assert.Nil(t, publicKey)
-		assert.Equal(t, "Could not obtain public key: example error", err.Error())
+		assert.Equal(t, "Could not obtain public key after 5 attempts: example error", err.Error())
 	})
 
 	t.Run("Request_Public_Key_Success", func(t *testing.T) {
@@ -80,7 +86,7 @@ func TestMiddleware(t *testing.T) {
 
 		serviceMock.EXPECT().GetPublicKey(gomock.Any()).Return(&publicKeyExample, nil)
 
-		publicKey, err := RequestPublicKey(serviceMock, correlationID)
+		publicKey, err := RequestPublicKey(serviceMock, correlationID, environment, fastBackoff)
 
 		assert.Nil(t, err)
 		assert.Equal(t, *publicKey, publicKeyExample)

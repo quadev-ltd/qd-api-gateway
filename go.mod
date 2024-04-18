@@ -9,7 +9,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/quadev-ltd/qd-common v0.0.51
 	github.com/rs/zerolog v1.31.0
-	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.61.0
 	google.golang.org/protobuf v1.31.0
@@ -47,6 +46,7 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/viper v1.18.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect

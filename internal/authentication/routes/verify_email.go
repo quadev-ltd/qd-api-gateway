@@ -14,8 +14,8 @@ func VerifyEmail(ctx *gin.Context, client pb_authentication.AuthenticationServic
 	res, err := client.VerifyEmail(
 		ctx.Request.Context(),
 		&pb_authentication.VerifyEmailRequest{
-			UserId:            ctx.Param("user_id"),
-			VerificationToken: ctx.Param("verification_token"),
+			UserID:            ctx.Param("userID"),
+			VerificationToken: ctx.Param("verificationToken"),
 		},
 	)
 

@@ -32,12 +32,12 @@ func RegisterRoutes(
 
 	userRoutes := api.Group("/user")
 	userRoutes.POST("/", service.Register)
-	userRoutes.POST("/:user_id/email/:verification_token", service.VerifyEmail)
+	userRoutes.POST("/:userID/email/:verificationToken", service.VerifyEmail)
 	userRoutes.POST("/sessions", service.Authenticate)
-	userRoutes.POST("/email/verification", authenticationMiddleware.RequireAuthentication, service.ResendEmailVerification)
+	userRoutes.POST("/:userID/email/verification", service.ResendEmailVerification)
 	userRoutes.POST("/password/reset-request", service.ForgotPassword)
-	userRoutes.GET("/:user_id/password/reset-verification/:verification_token", service.VerifyResetPasswordToken)
-	userRoutes.POST("/:user_id/password/reset/:verification_token", service.ResetPassword)
+	userRoutes.GET("/:userID/password/reset-verification/:verificationToken", service.VerifyResetPasswordToken)
+	userRoutes.POST("/:userID/password/reset/:verificationToken", service.ResetPassword)
 	userRoutes.GET("/", authenticationMiddleware.RequireAuthentication, service.GetUserProfile)
 	userRoutes.PUT("/", authenticationMiddleware.RequireAuthentication, service.UpdateUserProfile)
 

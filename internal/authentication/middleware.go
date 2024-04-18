@@ -132,7 +132,7 @@ func ParseAccessToken(ctx *gin.Context) *string {
 	return &token[1]
 }
 
-func (autheticationMiddleware *AutheticationMiddleware) verifyToken(ctx *gin.Context, expectedTokenType commonToken.TokenType) {
+func (autheticationMiddleware *AutheticationMiddleware) verifyToken(ctx *gin.Context, expectedTokenType commonToken.Type) {
 	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
@@ -154,7 +154,7 @@ func (autheticationMiddleware *AutheticationMiddleware) verifyToken(ctx *gin.Con
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	if commonToken.TokenType(claims.Type) != expectedTokenType {
+	if commonToken.Type(claims.Type) != expectedTokenType {
 		logger.Error(nil, fmt.Sprintf("The bearer token was not an %s", expectedTokenType))
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return

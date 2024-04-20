@@ -9,6 +9,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const (
+	TooManyRequests = "too_many_requests"
+)
+
 // GRPCErrorToHTTPStatus converts a gRPC error to an HTTP status code
 func GRPCErrorToHTTPStatus(err error) int {
 	st, ok := status.FromError(err)

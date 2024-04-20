@@ -14,7 +14,7 @@ func ResendEmailVerification(ctx *gin.Context, client pb_authentication.Authenti
 	res, err := client.ResendEmailVerification(
 		ctx.Request.Context(),
 		&pb_authentication.ResendEmailVerificationRequest{
-			UserId: ctx.Param("user_id"),
+			UserID: ctx.Param("userID"),
 		},
 	)
 

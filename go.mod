@@ -7,9 +7,10 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
-	github.com/quadev-ltd/qd-common v0.0.49
+	github.com/quadev-ltd/qd-common v0.0.55
 	github.com/rs/zerolog v1.31.0
 	github.com/stretchr/testify v1.8.4
+	golang.org/x/time v0.5.0
 	google.golang.org/grpc v1.61.0
 	google.golang.org/protobuf v1.31.0
 )

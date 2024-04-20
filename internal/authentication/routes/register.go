@@ -15,9 +15,9 @@ import (
 type RegisterRequestBody struct {
 	Email       string                 `json:"email"`
 	Password    string                 `json:"password"`
-	FirstName   string                 `json:"first_name"`
-	LastName    string                 `json:"last_name"`
-	DateOfBirth *timestamppb.Timestamp `json:"date_of_birth,omitempty"`
+	FirstName   string                 `json:"firstName"`
+	LastName    string                 `json:"lastName"`
+	DateOfBirth *timestamppb.Timestamp `json:"dateOfBirth,omitempty"`
 }
 
 // Register registers a new user
@@ -29,7 +29,7 @@ func Register(ctx *gin.Context, client pb_authentication.AuthenticationServiceCl
 		return
 	}
 	if body.DateOfBirth == nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("date_of_birth is required"))
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("dateOfBirth is required"))
 		return
 	}
 	res, err := client.Register(ctx.Request.Context(), &pb_authentication.RegisterRequest{

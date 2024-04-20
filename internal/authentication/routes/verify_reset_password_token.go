@@ -14,8 +14,8 @@ func VerifyResetPasswordToken(ctx *gin.Context, client pb_authentication.Authent
 	res, err := client.VerifyResetPasswordToken(
 		ctx.Request.Context(),
 		&pb_authentication.VerifyResetPasswordTokenRequest{
-			UserId: ctx.Param("user_id"),
-			Token:  ctx.Param("verification_token"),
+			UserID: ctx.Param("userID"),
+			Token:  ctx.Param("verificationToken"),
 		},
 	)
 

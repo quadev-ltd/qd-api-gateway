@@ -13,9 +13,9 @@ import (
 
 // UpdateUserProfileRequestBody is the request body for the UpdateUserProfile route
 type UpdateUserProfileRequestBody struct {
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	DateOfBirth *int64 `json:"date_of_birth,omitempty"`
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	DateOfBirth *int64 `json:"dateOfBirth,omitempty"`
 }
 
 // UpdateUserProfile updates a user's profile

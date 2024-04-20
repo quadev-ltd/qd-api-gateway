@@ -35,7 +35,7 @@ func RegisterRoutes(
 	api := router.Group("/api/v1")
 
 	userRoutes := api.Group("/user")
-	userRoutes.POST("/", service.Register)
+	userRoutes.POST("/", middleware.RateLimitMiddleware(rl), service.Register)
 	userRoutes.POST("/:userID/email/:verificationToken", service.VerifyEmail)
 	userRoutes.POST("/sessions", service.Authenticate)
 	userRoutes.POST("/:userID/email/verification", middleware.RateLimitMiddleware(rl), service.ResendEmailVerification)

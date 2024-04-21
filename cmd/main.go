@@ -27,12 +27,17 @@ func main() {
 	)
 
 	router := gin.Default()
-
 	router.Use(commonLogger.AddNewCorrelationIDToContext)
 	logger := commonLogger.NewLogFactory(configuration.Environment)
 	router.Use(commonLogger.CreateGinLoggerMiddleware(logger))
 
-	_, err = authentication.RegisterRoutes(router, &centralConfig, &configuration)
+	// Universal links
+	router.StaticFile("/.well-known/apple-app-site-association", "./.well-known/apple-app-site-association")
+	router.StaticFile("/.well-known/assetlinks.json", "./.well-known/assetlinks.json")
+
+	api := router.Group("/api/v1")
+
+	_, err = authentication.RegisterRoutes(api, &centralConfig, &configuration)
 	if err != nil {
 		log.Fatalln("Failed to register authentication routes: ", err)
 	}

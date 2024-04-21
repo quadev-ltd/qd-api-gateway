@@ -13,7 +13,7 @@ import (
 
 // RegisterRoutes registers the authentication routes
 func RegisterRoutes(
-	router *gin.Engine,
+	api *gin.RouterGroup,
 	centralConfig *commonConfig.Config,
 	configurations *config.Config,
 ) (*ServiceClient, error) {
@@ -32,16 +32,14 @@ func RegisterRoutes(
 
 	rl := middleware.NewRateLimiter(rate.Limit(0.08), 5)
 
-	api := router.Group("/api/v1")
-
 	userRoutes := api.Group("/user")
 	userRoutes.POST("/", middleware.RateLimitMiddleware(rl), service.Register)
 	userRoutes.POST("/:userID/email/:verificationToken", service.VerifyEmail)
-	userRoutes.POST("/sessions", service.Authenticate)
+	userRoutes.POST("/sessions", middleware.RateLimitMiddleware(rl), service.Authenticate)
 	userRoutes.POST("/:userID/email/verification", middleware.RateLimitMiddleware(rl), service.ResendEmailVerification)
-	userRoutes.POST("/password/reset-request", service.ForgotPassword)
-	userRoutes.GET("/:userID/password/reset-verification/:verificationToken", service.VerifyResetPasswordToken)
-	userRoutes.POST("/:userID/password/reset/:verificationToken", service.ResetPassword)
+	userRoutes.POST("/password/reset-request", middleware.RateLimitMiddleware(rl), service.ForgotPassword)
+	userRoutes.GET("/:userID/password/reset-verification/:verificationToken", middleware.RateLimitMiddleware(rl), service.VerifyResetPasswordToken)
+	userRoutes.POST("/:userID/password/reset/:verificationToken", middleware.RateLimitMiddleware(rl), service.ResetPassword)
 	userRoutes.GET("/", authenticationMiddleware.RequireAuthentication, service.GetUserProfile)
 	userRoutes.PUT("/", authenticationMiddleware.RequireAuthentication, service.UpdateUserProfile)
 

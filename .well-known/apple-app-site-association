@@ -4,11 +4,11 @@
     "details": [
       {
         "appID": "6Z7A6H54K9.com.qdmobile.dev",
-        "paths": ["/api/v1/user/*/email/", "/api/v1/user/*/password/"]
+        "paths": ["/*"]
       },
       {
         "appID": "6Z7A6H54K9.com.qdmobile",
-        "paths": ["/api/v1/user/*/email/", "/api/v1/user/*/password/"]
+        "paths": ["/*"]
       }
     ]
   }

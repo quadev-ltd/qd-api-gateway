@@ -3,12 +3,10 @@
     "apps": [],
     "details": [
       {
-        "appID": "LQRYUWUP72.com.qdmobile.dev",
-        "paths": ["/*"]
+        "appID": "LQRYUWUP72.com.qdmobile.dev", "paths": ["/*"]
       },
       {
-        "appID": "LQRYUWUP72.com.qdmobile",
-        "paths": ["/*"]
+        "appID": "LQRYUWUP72.com.qdmobile", "paths": ["/*"]
       }
     ]
   }

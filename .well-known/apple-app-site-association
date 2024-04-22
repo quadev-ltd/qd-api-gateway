@@ -3,11 +3,11 @@
     "apps": [],
     "details": [
       {
-        "appID": "6Z7A6H54K9.com.qdmobile.dev",
+        "appID": "LQRYUWUP72.com.qdmobile.dev",
         "paths": ["/*"]
       },
       {
-        "appID": "6Z7A6H54K9.com.qdmobile",
+        "appID": "LQRYUWUP72.com.qdmobile",
         "paths": ["/*"]
       }
     ]

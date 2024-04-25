@@ -93,7 +93,7 @@ func RequestPublicKey(
 
 // RequireAuthentication verifies the access token
 func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ctx *gin.Context) {
-	autheticationMiddleware.verifyToken(ctx, commonToken.AccessTokenType)
+	autheticationMiddleware.verifyToken(ctx, commonToken.AuthTokenType)
 }
 
 // RefreshAuthentication verifies the refresh token
@@ -155,7 +155,7 @@ func (autheticationMiddleware *AutheticationMiddleware) verifyToken(ctx *gin.Con
 		return
 	}
 	if commonToken.Type(claims.Type) != expectedTokenType {
-		logger.Error(nil, fmt.Sprintf("The bearer token was not an %s", expectedTokenType))
+		logger.Error(nil, fmt.Sprintf("The bearer token was not an %s but a %s", expectedTokenType, claims.Type))
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}

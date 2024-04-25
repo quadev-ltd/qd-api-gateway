@@ -256,7 +256,7 @@ func TestMiddleware(t *testing.T) {
 
 		jwtVerifierMock.EXPECT().Verify("test-header").Return(testToken, nil)
 		jwtTokenInspectorMock.EXPECT().GetClaimsFromToken(testToken).Return(tokenClaims, nil)
-		loggerMock.EXPECT().Error(nil, "The bearer token was not an AccessTokenType")
+		loggerMock.EXPECT().Error(nil, "The bearer token was not an AuthTokenType")
 
 		authenticationMiddleware.RequireAuthentication(ctx)
 
@@ -279,7 +279,7 @@ func TestMiddleware(t *testing.T) {
 		authHeader := "Bearer test-header"
 		testToken := &jwt.Token{}
 		tokenClaims := &commmonJWT.TokenClaims{
-			Type:   commonToken.AccessTokenType,
+			Type:   commonToken.AuthTokenType,
 			Expiry: time.Now().Add(-1 * time.Second),
 		}
 
@@ -310,7 +310,7 @@ func TestMiddleware(t *testing.T) {
 		authHeader := "Bearer test-header"
 		testToken := &jwt.Token{}
 		tokenClaims := &commmonJWT.TokenClaims{
-			Type:   commonToken.AccessTokenType,
+			Type:   commonToken.AuthTokenType,
 			Expiry: time.Now().Add(10 * time.Second),
 		}
 
@@ -342,7 +342,7 @@ func TestMiddleware(t *testing.T) {
 		authHeader := "Bearer test-header"
 		testToken := &jwt.Token{}
 		tokenClaims := &commmonJWT.TokenClaims{
-			Type:   commonToken.AccessTokenType,
+			Type:   commonToken.AuthTokenType,
 			Expiry: time.Now().Add(-1 * time.Second),
 		}
 

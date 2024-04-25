@@ -256,7 +256,7 @@ func TestMiddleware(t *testing.T) {
 
 		jwtVerifierMock.EXPECT().Verify("test-header").Return(testToken, nil)
 		jwtTokenInspectorMock.EXPECT().GetClaimsFromToken(testToken).Return(tokenClaims, nil)
-		loggerMock.EXPECT().Error(nil, "The bearer token was not an AuthTokenType")
+		loggerMock.EXPECT().Error(nil, "The bearer token was not an AuthTokenType but a RefreshTokenType")
 
 		authenticationMiddleware.RequireAuthentication(ctx)
 
@@ -350,7 +350,7 @@ func TestMiddleware(t *testing.T) {
 
 		jwtVerifierMock.EXPECT().Verify("test-header").Return(testToken, nil)
 		jwtTokenInspectorMock.EXPECT().GetClaimsFromToken(testToken).Return(tokenClaims, nil)
-		loggerMock.EXPECT().Error(nil, "The bearer token was not an RefreshTokenType")
+		loggerMock.EXPECT().Error(nil, "The bearer token was not an RefreshTokenType but a AuthTokenType")
 
 		authenticationMiddleware.RefreshAuthentication(ctx)
 

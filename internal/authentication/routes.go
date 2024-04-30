@@ -37,7 +37,7 @@ func RegisterRoutes(
 	userRoutes.POST("/:userID/email/:verificationToken", service.VerifyEmail)
 	userRoutes.POST("/sessions", middleware.RateLimitMiddleware(rl), service.Authenticate)
 	userRoutes.POST("/:userID/email/verification", middleware.RateLimitMiddleware(rl), service.ResendEmailVerification)
-	userRoutes.POST("/password/reset-request", middleware.RateLimitMiddleware(rl), service.ForgotPassword)
+	userRoutes.POST("/password/reset", middleware.RateLimitMiddleware(rl), service.ForgotPassword)
 	userRoutes.GET("/:userID/password/reset-verification/:verificationToken", middleware.RateLimitMiddleware(rl), service.VerifyResetPasswordToken)
 	userRoutes.POST("/:userID/password/reset/:verificationToken", middleware.RateLimitMiddleware(rl), service.ResetPassword)
 	userRoutes.GET("/profile", authenticationMiddleware.RequireAuthentication, service.GetUserProfile)

@@ -10,6 +10,7 @@ import (
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
 )
 
+// RateLimiter settings type
 type RateLimiter struct {
 	rate  rate.Limit
 	burst int
@@ -17,6 +18,7 @@ type RateLimiter struct {
 	mtx   sync.Mutex
 }
 
+// NewRateLimiter Return new RateLimiter
 func NewRateLimiter(r rate.Limit, b int) *RateLimiter {
 	return &RateLimiter{
 		rate:  r,
@@ -25,6 +27,7 @@ func NewRateLimiter(r rate.Limit, b int) *RateLimiter {
 	}
 }
 
+// GetLimiter returns rate limiter instance for a given IP address locking instance
 func (rateLimitter *RateLimiter) GetLimiter(ip string) *rate.Limiter {
 	rateLimitter.mtx.Lock()
 	defer rateLimitter.mtx.Unlock()
@@ -38,6 +41,7 @@ func (rateLimitter *RateLimiter) GetLimiter(ip string) *rate.Limiter {
 	return limiter
 }
 
+// RateLimitMiddleware returns the rate limiter middleware
 func RateLimitMiddleware(rl *RateLimiter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ip := c.ClientIP()

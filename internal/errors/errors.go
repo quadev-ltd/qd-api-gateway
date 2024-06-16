@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Error name constants
 const (
 	TooManyRequests = "too_many_requests"
 )

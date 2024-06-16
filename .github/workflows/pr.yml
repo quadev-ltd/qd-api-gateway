@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  sanity-check:
     name: Build and Test
     runs-on: ubuntu-20.04
     container: tavoargento/quadev-go-service:0.0.1  # Specify the Docker image

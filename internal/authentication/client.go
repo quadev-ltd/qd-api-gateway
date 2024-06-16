@@ -79,6 +79,11 @@ func (service *ServiceClient) Authenticate(ctx *gin.Context) {
 	routes.Authenticate(ctx, service.client)
 }
 
+// AuthenticateWithFirebase redirects request to the authentication with firebase route
+func (service *ServiceClient) AuthenticateWithFirebase(ctx *gin.Context) {
+	routes.AuthenticateWithFirebase(ctx, service.client)
+}
+
 // RefreshToken redirects request to the refresh token route
 func (service *ServiceClient) RefreshToken(ctx *gin.Context) {
 	routes.RefreshToken(ctx, service.client)

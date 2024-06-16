@@ -12,7 +12,8 @@ import (
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/config"
 )
 
-const ApiPath = "/api/v1"
+// APIPath is the path of the API
+const APIPath = "/api/v1"
 
 func main() {
 	configuration := config.Config{}
@@ -37,12 +38,12 @@ func main() {
 	router.StaticFile("/.well-known/apple-app-site-association", "./.well-known/apple-app-site-association")
 	router.StaticFile("/.well-known/assetlinks.json", "./.well-known/assetlinks.json")
 
-	api := router.Group(ApiPath)
+	api := router.Group(APIPath)
 
 	_, err = authentication.RegisterRoutes(api, &centralConfig, &configuration)
 	if err != nil {
 		log.Fatalln("Failed to register authentication routes: ", err)
 	}
-	fmt.Println("Listening API requests on URL: ", fmt.Sprintf("%s:%s%s", centralConfig.GatewayService.Host, centralConfig.GatewayService.Port, ApiPath))
+	fmt.Println("Listening API requests on URL: ", fmt.Sprintf("%s:%s%s", centralConfig.GatewayService.Host, centralConfig.GatewayService.Port, APIPath))
 	router.Run(fmt.Sprintf("%s:%s", centralConfig.GatewayService.Host, centralConfig.GatewayService.Port))
 }

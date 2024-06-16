@@ -51,6 +51,7 @@ func InitAuthenticationMiddleware(authenticationService ServiceClienter, configu
 	}, nil
 }
 
+// BackoffStrategy is backoff strategy type
 type BackoffStrategy func(attempt int) time.Duration
 
 // backoffDelay calculates the delay for the current retry attempt.

@@ -43,6 +43,7 @@ func RegisterRoutes(
 	userRoutes.POST("/:userID/password/reset/:verificationToken", middleware.RateLimitMiddleware(rl), service.ResetPassword)
 	userRoutes.GET("/profile", authenticationMiddleware.RequireAuthentication, service.GetUserProfile)
 	userRoutes.PUT("/profile", authenticationMiddleware.RequireAuthentication, service.UpdateUserProfile)
+	userRoutes.DELETE("/", authenticationMiddleware.RequireAuthentication, service.DeleteAccount)
 
 	authenticationRoutes := api.Group("/authentication")
 	authenticationRoutes.Use(authenticationMiddleware.RefreshAuthentication)

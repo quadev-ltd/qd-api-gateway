@@ -34,10 +34,6 @@ func main() {
 	logger := commonLogger.NewLogFactory(configuration.Environment)
 	router.Use(commonLogger.CreateGinLoggerMiddleware(logger))
 
-	// Universal links
-	router.StaticFile("/.well-known/apple-app-site-association", "./.well-known/apple-app-site-association")
-	router.StaticFile("/.well-known/assetlinks.json", "./.well-known/assetlinks.json")
-
 	api := router.Group(APIPath)
 
 	_, err = authentication.RegisterRoutes(api, &centralConfig, &configuration)

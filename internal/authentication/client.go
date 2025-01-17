@@ -113,3 +113,8 @@ func (service *ServiceClient) GetUserProfile(ctx *gin.Context) {
 func (service *ServiceClient) UpdateUserProfile(ctx *gin.Context) {
 	routes.UpdateUserProfile(ctx, service.client)
 }
+
+// DeleteAccount redirects request to the update user profile route
+func (service *ServiceClient) DeleteAccount(ctx *gin.Context) {
+	routes.DeleteAccount(ctx, service.client)
+}

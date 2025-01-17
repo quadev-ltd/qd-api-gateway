@@ -14,6 +14,5 @@ WORKDIR /root/
 COPY --from=builder /app/main .
 COPY --from=builder /app/internal/config ./internal/config
 COPY certs /root/certs
-COPY .well-known /root/.well-known
 ENV APP_ENV=dev
 CMD ["./main"]

@@ -1,0 +1,9 @@
+environment: local
+verbose: true
+aws:
+  key: ""
+  secret: ""
+tlsEnabled: true
+imageAnalysisService:
+  host: "localhost"
+  port: "50053"

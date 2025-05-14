@@ -8,11 +8,18 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type ServiceConfig struct {
+	Host string
+	Port string
+}
+
 // Config is the configuration of the application
 type Config struct {
-	Verbose     bool
-	Environment string
-	AWS         commonAWS.Config
+	Verbose             bool
+	Environment         string
+	AWS                 commonAWS.Config
+	TLSEnabled          bool
+	ImageAnalysisService ServiceConfig
 }
 
 // Load loads the configuration from the given path yml file

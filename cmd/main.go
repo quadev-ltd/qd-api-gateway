@@ -8,10 +8,8 @@ import (
 	commontConfig "github.com/quadev-ltd/qd-common/pkg/config"
 	commonLogger "github.com/quadev-ltd/qd-common/pkg/log"
 
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/authentication"
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/config"
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/image_analysis"
-	sharedMiddleware "github.com/quadev-ltd/qd-qpi-gateway/internal/shared/middleware"
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/services"
 )
 
 // APIPath is the path of the API
@@ -38,19 +36,9 @@ func main() {
 
 	api := router.Group(APIPath)
 
-	authService, err := authentication.RegisterRoutes(api, &centralConfig, &configuration)
-	if err != nil {
-		log.Fatalln("Failed to register authentication routes: ", err)
-	}
-
-	authMiddleware, err := authentication.InitAuthenticationMiddleware(authService, &configuration)
-	if err != nil {
-		log.Fatalln("Failed to initialize authentication middleware: ", err)
-	}
-
-	_, err = image_analysis.RegisterRoutes(api, &configuration, authMiddleware.(sharedMiddleware.AutheticationMiddlewarer))
-	if err != nil {
-		log.Fatalln("Failed to register image analysis routes: ", err)
+	serviceInitializer := services.NewServiceInitialiser(&configuration, &centralConfig, router, api)
+	if err := serviceInitializer.InitializeAllServices(); err != nil {
+		log.Fatalln("Failed to initialize services:", err)
 	}
 
 	fmt.Println("Listening API requests on URL: ", fmt.Sprintf("%s:%s%s", centralConfig.GatewayService.Host, centralConfig.GatewayService.Port, APIPath))

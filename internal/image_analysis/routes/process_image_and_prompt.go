@@ -7,7 +7,6 @@ import (
 	"github.com/quadev-ltd/qd-common/pb/gen/go/pb_image_analysis"
 
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/shared/middleware"
 )
 
 type ProcessImagePromptRequestBody struct {
@@ -15,13 +14,7 @@ type ProcessImagePromptRequestBody struct {
 	Prompt string `json:"prompt" binding:"required"`
 }
 
-func ProcessImagePrompt(ctx *gin.Context, client pb_image_analysis.ImageAnalysisServiceClient) {
-	firebaseToken := middleware.ParseAccessToken(ctx)
-	if firebaseToken == nil {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
-	}
-
+func ProcessImageAndPrompt(ctx *gin.Context, client pb_image_analysis.ImageAnalysisServiceClient) {
 	body := ProcessImagePromptRequestBody{}
 	if err := ctx.BindJSON(&body); err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, err)
@@ -31,7 +24,7 @@ func ProcessImagePrompt(ctx *gin.Context, client pb_image_analysis.ImageAnalysis
 	res, err := client.ProcessImageAndPrompt(
 		ctx.Request.Context(),
 		&pb_image_analysis.ImagePromptRequest{
-			FirebaseToken: *firebaseToken,
+			FirebaseToken: "",
 			ImageData:     body.Image,
 			Prompt:        body.Prompt,
 		},

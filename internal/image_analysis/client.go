@@ -1,21 +1,19 @@
 package image_analysis
 
 import (
-	"context"
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	"github.com/quadev-ltd/qd-common/pb/gen/go/pb_image_analysis"
 	commonTLS "github.com/quadev-ltd/qd-common/pkg/tls"
 	"github.com/rs/zerolog/log"
-	"google.golang.org/grpc"
 
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/config"
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/shared/middleware"
+	commonConfig "github.com/quadev-ltd/qd-qpi-gateway/internal/config"
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/image_analysis/routes"
 )
 
 type ServiceClienter interface {
-	ProcessImageAndPrompt(ctx context.Context, firebaseToken string, imageData []byte, prompt string) (*pb_image_analysis.ImagePromptResponse, error)
-	middleware.ServiceClienter
+	ProcessImageAndPrompt(ctx *gin.Context)
 }
 
 type ServiceClient struct {
@@ -24,11 +22,11 @@ type ServiceClient struct {
 
 var _ ServiceClienter = &ServiceClient{}
 
-func InitServiceClient(configurations *config.Config) (ServiceClienter, error) {
+func InitServiceClient(configurations *commonConfig.Config) (ServiceClienter, error) {
 	log.Info().Msg("Initializing image analysis service client")
 
-	addr := fmt.Sprintf("%s:%s", 
-		configurations.ImageAnalysisService.Host, 
+	addr := fmt.Sprintf("%s:%s",
+		configurations.ImageAnalysisService.Host,
 		configurations.ImageAnalysisService.Port)
 
 	conn, err := commonTLS.CreateGRPCConnection(addr, configurations.TLSEnabled)
@@ -43,14 +41,6 @@ func InitServiceClient(configurations *config.Config) (ServiceClienter, error) {
 	}, nil
 }
 
-func (service *ServiceClient) ProcessImageAndPrompt(ctx context.Context, firebaseToken string, imageData []byte, prompt string) (*pb_image_analysis.ImagePromptResponse, error) {
-	return service.client.ProcessImageAndPrompt(ctx, &pb_image_analysis.ImagePromptRequest{
-		FirebaseToken: firebaseToken,
-		ImageData:     imageData,
-		Prompt:        prompt,
-	})
-}
-
-func (service *ServiceClient) GetPublicKey(ctx context.Context) (*string, error) {
-	return nil, fmt.Errorf("image analysis service does not provide public keys")
+func (service *ServiceClient) ProcessImageAndPrompt(ctx *gin.Context) {
+	routes.ProcessImageAndPrompt(ctx, service.client)
 }

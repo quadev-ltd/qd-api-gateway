@@ -1,4 +1,4 @@
-package authentication
+package middleware
 
 import (
 	"context"
@@ -17,13 +17,15 @@ import (
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/config"
 )
 
-// AutheticationMiddlewarer interface is used to verify JWT tokens
+type ServiceClienter interface {
+	GetPublicKey(ctx context.Context) (*string, error)
+}
+
 type AutheticationMiddlewarer interface {
 	RequireAuthentication(ctx *gin.Context)
 	RefreshAuthentication(ctx *gin.Context)
 }
 
-// AutheticationMiddleware is used to verify JWT tokens
 type AutheticationMiddleware struct {
 	service           ServiceClienter
 	jwtVerifier       commonJWT.TokenVerifierer
@@ -32,7 +34,6 @@ type AutheticationMiddleware struct {
 
 var _ AutheticationMiddlewarer = &AutheticationMiddleware{}
 
-// InitAuthenticationMiddleware initializes the authentication middleware
 func InitAuthenticationMiddleware(authenticationService ServiceClienter, configurations *config.Config) (AutheticationMiddlewarer, error) {
 	correlationID := uuid.New().String()
 	publicKey, err := RequestPublicKey(authenticationService, correlationID, configurations.Environment, backoffDelay)
@@ -51,10 +52,8 @@ func InitAuthenticationMiddleware(authenticationService ServiceClienter, configu
 	}, nil
 }
 
-// BackoffStrategy is backoff strategy type
 type BackoffStrategy func(attempt int) time.Duration
 
-// backoffDelay calculates the delay for the current retry attempt.
 func backoffDelay(attempt int) time.Duration {
 	const maxDelay = 30 * time.Second
 	delay := time.Duration(math.Pow(2, float64(attempt))) * time.Second
@@ -64,7 +63,6 @@ func backoffDelay(attempt int) time.Duration {
 	return delay
 }
 
-// RequestPublicKey requests the public key from the authentication service
 func RequestPublicKey(
 	service ServiceClienter,
 	correlationID,
@@ -92,17 +90,14 @@ func RequestPublicKey(
 	return nil, fmt.Errorf("Could not obtain public key after %d attempts: %v", maxAttempts, err)
 }
 
-// RequireAuthentication verifies the access token
 func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ctx *gin.Context) {
 	autheticationMiddleware.verifyToken(ctx, commonToken.AuthTokenType)
 }
 
-// RefreshAuthentication verifies the refresh token
 func (autheticationMiddleware *AutheticationMiddleware) RefreshAuthentication(ctx *gin.Context) {
 	autheticationMiddleware.verifyToken(ctx, commonToken.RefreshTokenType)
 }
 
-// ParseAccessToken parses the access token from the request
 func ParseAccessToken(ctx *gin.Context) *string {
 	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
 	if err != nil {

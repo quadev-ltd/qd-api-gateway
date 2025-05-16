@@ -8,7 +8,7 @@ import (
 
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/authentication"
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/config"
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/image_analysis"
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/imageanalysis"
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/middleware"
 )
 
@@ -20,7 +20,7 @@ type ServiceInitialiser struct {
 	apiGroup             *gin.RouterGroup
 	authMiddleware       middleware.AutheticationMiddlewarer
 	authService          authentication.ServiceClienter
-	imageAnalysisService image_analysis.ServiceClienter
+	imageAnalysisService imageanalysis.ServiceClienter
 }
 
 // NewServiceInitialiser creates a new ServiceInitializer
@@ -61,13 +61,13 @@ func (serviceInitialiser *ServiceInitialiser) InitializeImageAnalysisService() e
 		return fmt.Errorf("authentication middleware not initialized")
 	}
 
-	imageAnalysisService, err := image_analysis.InitServiceClient(serviceInitialiser.config)
+	imageAnalysisService, err := imageanalysis.InitServiceClient(serviceInitialiser.centralConfig)
 	if err != nil {
 		return fmt.Errorf("could not initialize image analysis service client: %w", err)
 	}
 	serviceInitialiser.imageAnalysisService = imageAnalysisService
 
-	err = image_analysis.RegisterRoutes(imageAnalysisService, serviceInitialiser.apiGroup, serviceInitialiser.config, serviceInitialiser.authMiddleware)
+	err = imageanalysis.RegisterRoutes(imageAnalysisService, serviceInitialiser.apiGroup, serviceInitialiser.centralConfig, serviceInitialiser.authMiddleware)
 	if err != nil {
 		return fmt.Errorf("failed to register image analysis routes: %w", err)
 	}

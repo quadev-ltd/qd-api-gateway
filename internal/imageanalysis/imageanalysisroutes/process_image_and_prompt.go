@@ -1,4 +1,4 @@
-package routes
+package imageanalysisroutes
 
 import (
 	"net/http"
@@ -9,11 +9,13 @@ import (
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
 )
 
+// ProcessImagePromptRequestBody represents the expected request body for image processing
 type ProcessImagePromptRequestBody struct {
-	Image  []byte `json:"image" binding:"required"`
-	Prompt string `json:"prompt" binding:"required"`
+	Image  []byte `json:"image" binding:"required"`  // Base64 encoded image data
+	Prompt string `json:"prompt" binding:"required"` // Text prompt for image analysis
 }
 
+// ProcessImageAndPrompt handles the image processing request by forwarding it to the image analysis service
 func ProcessImageAndPrompt(ctx *gin.Context, client pb_image_analysis.ImageAnalysisServiceClient) {
 	body := ProcessImagePromptRequestBody{}
 	if err := ctx.BindJSON(&body); err != nil {

@@ -17,15 +17,20 @@ import (
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/config"
 )
 
+// ServiceClienter defines the interface for services that can provide public keys
 type ServiceClienter interface {
 	GetPublicKey(ctx context.Context) (*string, error)
 }
 
+// AutheticationMiddlewarer defines the interface for authentication middleware
 type AutheticationMiddlewarer interface {
+	// RequireAuthentication ensures the request has a valid authentication token
 	RequireAuthentication(ctx *gin.Context)
+	// RefreshAuthentication ensures the request has a valid refresh token
 	RefreshAuthentication(ctx *gin.Context)
 }
 
+// AutheticationMiddleware implements the AutheticationMiddlewarer interface
 type AutheticationMiddleware struct {
 	service           ServiceClienter
 	jwtVerifier       commonJWT.TokenVerifierer
@@ -34,6 +39,7 @@ type AutheticationMiddleware struct {
 
 var _ AutheticationMiddlewarer = &AutheticationMiddleware{}
 
+// InitAuthenticationMiddleware initializes a new authentication middleware with the provided service and configuration
 func InitAuthenticationMiddleware(authenticationService ServiceClienter, configurations *config.Config) (AutheticationMiddlewarer, error) {
 	correlationID := uuid.New().String()
 	publicKey, err := RequestPublicKey(authenticationService, correlationID, configurations.Environment, backoffDelay)
@@ -52,8 +58,10 @@ func InitAuthenticationMiddleware(authenticationService ServiceClienter, configu
 	}, nil
 }
 
+// BackoffStrategy defines a function type for implementing backoff delays
 type BackoffStrategy func(attempt int) time.Duration
 
+// backoffDelay implements an exponential backoff strategy with a maximum delay
 func backoffDelay(attempt int) time.Duration {
 	const maxDelay = 30 * time.Second
 	delay := time.Duration(math.Pow(2, float64(attempt))) * time.Second
@@ -63,6 +71,7 @@ func backoffDelay(attempt int) time.Duration {
 	return delay
 }
 
+// RequestPublicKey attempts to retrieve the public key from the authentication service with retries
 func RequestPublicKey(
 	service ServiceClienter,
 	correlationID,
@@ -90,14 +99,17 @@ func RequestPublicKey(
 	return nil, fmt.Errorf("Could not obtain public key after %d attempts: %v", maxAttempts, err)
 }
 
+// RequireAuthentication middleware ensures the request has a valid authentication token
 func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ctx *gin.Context) {
 	autheticationMiddleware.verifyToken(ctx, commonToken.AuthTokenType)
 }
 
+// RefreshAuthentication middleware ensures the request has a valid refresh token
 func (autheticationMiddleware *AutheticationMiddleware) RefreshAuthentication(ctx *gin.Context) {
 	autheticationMiddleware.verifyToken(ctx, commonToken.RefreshTokenType)
 }
 
+// ParseAccessToken extracts and validates the access token from the request headers
 func ParseAccessToken(ctx *gin.Context) *string {
 	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
 	if err != nil {

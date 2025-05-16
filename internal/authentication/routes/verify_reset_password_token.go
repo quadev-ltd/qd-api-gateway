@@ -1,4 +1,4 @@
-package authenticationroutes
+package routes
 
 import (
 	"net/http"

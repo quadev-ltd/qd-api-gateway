@@ -2,7 +2,6 @@ package imageanalysis
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/quadev-ltd/qd-common/pb/gen/go/pb_image_analysis"
@@ -10,7 +9,7 @@ import (
 	commonTLS "github.com/quadev-ltd/qd-common/pkg/tls"
 	"github.com/rs/zerolog/log"
 
-	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
+	"github.com/quadev-ltd/qd-qpi-gateway/internal/imageanalysis/routes"
 )
 
 // ServiceClienter defines the interface for the image analysis service client
@@ -46,38 +45,7 @@ func InitServiceClient(configurations *commonConfig.Config) (ServiceClienter, er
 	}, nil
 }
 
-// ProcessImagePromptRequestBody represents the expected request body for image processing
-type ProcessImagePromptRequestBody struct {
-	Image  []byte `json:"image" binding:"required"`  // Base64 encoded image data
-	Prompt string `json:"prompt" binding:"required"` // Text prompt for image analysis
-}
-
-// ProcessImageAndPrompt handles the image processing request by forwarding it to the image analysis service
-func ProcessImageAndPrompt(ctx *gin.Context, client pb_image_analysis.ImageAnalysisServiceClient) {
-	body := ProcessImagePromptRequestBody{}
-	if err := ctx.BindJSON(&body); err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	res, err := client.ProcessImageAndPrompt(
-		ctx.Request.Context(),
-		&pb_image_analysis.ImagePromptRequest{
-			FirebaseToken: "",
-			ImageData:     body.Image,
-			Prompt:        body.Prompt,
-		},
-	)
-
-	if err != nil {
-		errors.HandleError(ctx, err)
-		return
-	}
-
-	ctx.JSON(http.StatusOK, res)
-}
-
 // ProcessImageAndPrompt handles the HTTP request to process an image with a prompt
 func (service *ServiceClient) ProcessImageAndPrompt(ctx *gin.Context) {
-	ProcessImageAndPrompt(ctx, service.client)
+	routes.ProcessImageAndPrompt(ctx, service.client)
 }

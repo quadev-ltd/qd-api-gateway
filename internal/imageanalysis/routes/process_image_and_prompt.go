@@ -1,4 +1,4 @@
-package imageanalysisroutes
+package routes
 
 import (
 	"net/http"

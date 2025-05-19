@@ -26,9 +26,8 @@ func ProcessImageAndPrompt(ctx *gin.Context, client pb_image_analysis.ImageAnaly
 	res, err := client.ProcessImageAndPrompt(
 		ctx.Request.Context(),
 		&pb_image_analysis.ImagePromptRequest{
-			FirebaseToken: "",
-			ImageData:     body.Image,
-			Prompt:        body.Prompt,
+			ImageData: body.Image,
+			Prompt:    body.Prompt,
 		},
 	)
 

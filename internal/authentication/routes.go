@@ -1,8 +1,6 @@
 package authentication
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	commonConfig "github.com/quadev-ltd/qd-common/pkg/config"
 	"golang.org/x/time/rate"
@@ -13,22 +11,12 @@ import (
 
 // RegisterRoutes registers the authentication routes
 func RegisterRoutes(
+	service ServiceClienter,
 	api *gin.RouterGroup,
 	centralConfig *commonConfig.Config,
 	configurations *config.Config,
-) (*ServiceClient, error) {
-	client, err := InitServiceClient(centralConfig)
-	if err != nil {
-		return nil, fmt.Errorf("Could not initialize authentication service client: %v", err)
-	}
-	service := &ServiceClient{
-		client: client,
-	}
-
-	authenticationMiddleware, err := InitAuthenticationMiddleware(service, configurations)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to initiate authenticator middleware: %v", err)
-	}
+	authenticationMiddleware middleware.AutheticationMiddlewarer,
+) error {
 
 	rl := middleware.NewRateLimiter(rate.Limit(0.08), 5)
 
@@ -49,5 +37,5 @@ func RegisterRoutes(
 	authenticationRoutes.Use(authenticationMiddleware.RefreshAuthentication)
 	authenticationRoutes.POST("/refresh", service.RefreshToken)
 
-	return service, nil
+	return nil
 }

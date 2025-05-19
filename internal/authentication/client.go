@@ -19,12 +19,14 @@ type ServiceClienter interface {
 	VerifyEmail(ctx *gin.Context)
 	ResendEmailVerification(ctx *gin.Context)
 	Authenticate(ctx *gin.Context)
+	AuthenticateWithFirebase(ctx *gin.Context)
 	RefreshToken(ctx *gin.Context)
 	ForgotPassword(ctx *gin.Context)
 	VerifyResetPasswordToken(ctx *gin.Context)
 	ResetPassword(ctx *gin.Context)
 	GetUserProfile(ctx *gin.Context)
 	UpdateUserProfile(ctx *gin.Context)
+	DeleteAccount(ctx *gin.Context)
 }
 
 // ServiceClient is a struct for the authentication service client
@@ -35,7 +37,7 @@ type ServiceClient struct {
 var _ ServiceClienter = &ServiceClient{}
 
 // InitServiceClient initializes the authentication service client
-func InitServiceClient(config *commonConfig.Config) (pb_authentication.AuthenticationServiceClient, error) {
+func InitServiceClient(config *commonConfig.Config) (*ServiceClient, error) {
 	grpcServiceAddress := fmt.Sprintf("%s:%s", config.AuthenticationService.Host, config.AuthenticationService.Port)
 
 	fmt.Println("Connecting to authentication service at", grpcServiceAddress, config.TLSEnabled)
@@ -44,7 +46,10 @@ func InitServiceClient(config *commonConfig.Config) (pb_authentication.Authentic
 		return nil, fmt.Errorf("Could not connect to grpc authentication service: %v", err)
 	}
 
-	return pb_authentication.NewAuthenticationServiceClient(clientConnection), nil
+	service := &ServiceClient{
+		client: pb_authentication.NewAuthenticationServiceClient(clientConnection),
+	}
+	return service, nil
 }
 
 // GetPublicKey gets the public key from server

@@ -13,6 +13,7 @@ type Config struct {
 	Verbose     bool
 	Environment string
 	AWS         commonAWS.Config
+	TLSEnabled  bool
 }
 
 // Load loads the configuration from the given path yml file

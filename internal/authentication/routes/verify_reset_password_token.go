@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/quadev-ltd/qd-common/pb/gen/go/pb_authentication"
+
 	"github.com/quadev-ltd/qd-qpi-gateway/internal/errors"
 )
 

@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/golang/mock/gomock"
 	commmonJWT "github.com/quadev-ltd/qd-common/pkg/jwt"
+	commonJWT "github.com/quadev-ltd/qd-common/pkg/jwt"
 	commonJWTMock "github.com/quadev-ltd/qd-common/pkg/jwt/mock"
 	commonLogger "github.com/quadev-ltd/qd-common/pkg/log"
 	commonLoggerMock "github.com/quadev-ltd/qd-common/pkg/log/mock"
@@ -196,7 +197,6 @@ func TestMiddleware(t *testing.T) {
 		authHeader := "Bearer invalid-header"
 		ctx, w := createTestContextWithLogger(loggerMock, &authHeader)
 
-		loggerMock.EXPECT().Error(exampleError, "The bearer token was invalid")
 		jwtVerifierMock.EXPECT().Verify("invalid-header").Return(nil, exampleError)
 
 		authenticationMiddleware.RequireAuthentication(ctx)
@@ -226,7 +226,6 @@ func TestMiddleware(t *testing.T) {
 
 		jwtVerifierMock.EXPECT().Verify(testTokenValue).Return(testToken, nil)
 		jwtTokenInspectorMock.EXPECT().GetClaimsFromToken(testToken).Return(nil, exampleError)
-		loggerMock.EXPECT().Error(exampleError, "Could not obtain claims from bearer token")
 
 		authenticationMiddleware.RequireAuthentication(ctx)
 
@@ -256,7 +255,6 @@ func TestMiddleware(t *testing.T) {
 
 		jwtVerifierMock.EXPECT().Verify("test-header").Return(testToken, nil)
 		jwtTokenInspectorMock.EXPECT().GetClaimsFromToken(testToken).Return(tokenClaims, nil)
-		loggerMock.EXPECT().Error(nil, "The bearer token was not an AuthTokenType but a RefreshTokenType")
 
 		authenticationMiddleware.RequireAuthentication(ctx)
 
@@ -287,7 +285,6 @@ func TestMiddleware(t *testing.T) {
 
 		jwtVerifierMock.EXPECT().Verify("test-header").Return(testToken, nil)
 		jwtTokenInspectorMock.EXPECT().GetClaimsFromToken(testToken).Return(tokenClaims, nil)
-		loggerMock.EXPECT().Error(nil, "The bearer token has expired")
 
 		authenticationMiddleware.RequireAuthentication(ctx)
 
@@ -350,10 +347,77 @@ func TestMiddleware(t *testing.T) {
 
 		jwtVerifierMock.EXPECT().Verify("test-header").Return(testToken, nil)
 		jwtTokenInspectorMock.EXPECT().GetClaimsFromToken(testToken).Return(tokenClaims, nil)
-		loggerMock.EXPECT().Error(nil, "The bearer token was not an RefreshTokenType but a AuthTokenType")
 
 		authenticationMiddleware.RefreshAuthentication(ctx)
 
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
+	})
+
+	t.Run("RequirePaidFeatures_Success", func(t *testing.T) {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		serviceMock := mock.NewMockServiceClienter(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
+		authenticationMiddleware := &AutheticationMiddleware{
+			serviceMock,
+			jwtVerifierMock,
+			jwtTokenInspectorMock,
+		}
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
+
+		authHeader := "Bearer test-header"
+		testToken := &jwt.Token{}
+		tokenClaims := &commmonJWT.TokenClaims{
+			Type:            commonToken.AuthTokenType,
+			Expiry:          time.Now().Add(10 * time.Second),
+			HasPaidFeatures: true,
+		}
+		ctx, w := createTestContextWithLogger(loggerMock, &authHeader)
+
+		jwtVerifierMock.EXPECT().Verify("test-header").Return(testToken, nil)
+		jwtTokenInspectorMock.EXPECT().GetClaimsFromToken(testToken).Return(tokenClaims, nil)
+		jwtTokenInspectorMock.EXPECT().GetClaimsFromToken(testToken).Return(tokenClaims, nil)
+		loggerMock.EXPECT().Info("Successfully authenticated user")
+		ctx.Set(string(commonJWT.JWTTokenKey), testToken)
+		loggerMock.EXPECT().Info("User has access to paid features")
+
+		authenticationMiddleware.RequirePaidFeatures(ctx)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("RequirePaidFeatures_No_Paid_Features_Error", func(t *testing.T) {
+		controller := gomock.NewController(t)
+		defer controller.Finish()
+		serviceMock := mock.NewMockServiceClienter(controller)
+		jwtVerifierMock := commonJWTMock.NewMockTokenVerifierer(controller)
+		jwtTokenInspectorMock := commonJWTMock.NewMockTokenInspectorer(controller)
+		authenticationMiddleware := &AutheticationMiddleware{
+			serviceMock,
+			jwtVerifierMock,
+			jwtTokenInspectorMock,
+		}
+		loggerMock := commonLoggerMock.NewMockLoggerer(controller)
+
+		authHeader := "Bearer test-header"
+		testToken := &jwt.Token{}
+		tokenClaims := &commmonJWT.TokenClaims{
+			Type:            commonToken.AuthTokenType,
+			Expiry:          time.Now().Add(10 * time.Second),
+			HasPaidFeatures: false,
+		}
+
+		ctx, w := createTestContextWithLogger(loggerMock, &authHeader)
+
+		jwtVerifierMock.EXPECT().Verify("test-header").Return(testToken, nil)
+		jwtTokenInspectorMock.EXPECT().GetClaimsFromToken(testToken).Return(tokenClaims, nil)
+		jwtTokenInspectorMock.EXPECT().GetClaimsFromToken(testToken).Return(tokenClaims, nil)
+		loggerMock.EXPECT().Info("Successfully authenticated user")
+		ctx.Set(string(commonJWT.JWTTokenKey), testToken)
+
+		authenticationMiddleware.RequirePaidFeatures(ctx)
+
+		assert.Equal(t, http.StatusPaymentRequired, w.Code)
 	})
 }

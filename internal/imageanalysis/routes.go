@@ -13,7 +13,7 @@ func RegisterRoutes(service ServiceClienter, api *gin.RouterGroup, configuration
 	rl := middleware.NewRateLimiter(rate.Limit(0.05), 3) // 3 requests per minute
 
 	imageAnalysisRoutes := api.Group("/image-analysis")
-	imageAnalysisRoutes.POST("", authMiddleware.RequireAuthentication, middleware.RateLimitMiddleware(rl), service.ProcessImageAndPrompt)
+	imageAnalysisRoutes.POST("", authMiddleware.RequirePaidFeatures, middleware.RateLimitMiddleware(rl), service.ProcessImageAndPrompt)
 
 	return nil
 }

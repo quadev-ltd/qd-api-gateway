@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	commonJWT "github.com/quadev-ltd/qd-common/pkg/jwt"
 	commonLogger "github.com/quadev-ltd/qd-common/pkg/log"
@@ -28,6 +29,8 @@ type AutheticationMiddlewarer interface {
 	RequireAuthentication(ctx *gin.Context)
 	// RefreshAuthentication ensures the request has a valid refresh token
 	RefreshAuthentication(ctx *gin.Context)
+	// RequirePaidFeatures ensures the request has a valid authentication token with HasPaidFeatures set to true
+	RequirePaidFeatures(ctx *gin.Context)
 }
 
 // AutheticationMiddleware implements the AutheticationMiddlewarer interface
@@ -101,12 +104,18 @@ func RequestPublicKey(
 
 // RequireAuthentication middleware ensures the request has a valid authentication token
 func (autheticationMiddleware *AutheticationMiddleware) RequireAuthentication(ctx *gin.Context) {
-	autheticationMiddleware.verifyToken(ctx, commonToken.AuthTokenType)
+	_, isVerified := autheticationMiddleware.verifyToken(ctx, commonToken.AuthTokenType)
+	if isVerified {
+		ctx.Next()
+	}
 }
 
 // RefreshAuthentication middleware ensures the request has a valid refresh token
 func (autheticationMiddleware *AutheticationMiddleware) RefreshAuthentication(ctx *gin.Context) {
-	autheticationMiddleware.verifyToken(ctx, commonToken.RefreshTokenType)
+	_, isVerified := autheticationMiddleware.verifyToken(ctx, commonToken.RefreshTokenType)
+	if isVerified {
+		ctx.Next()
+	}
 }
 
 // ParseAccessToken extracts and validates the access token from the request headers
@@ -140,38 +149,37 @@ func ParseAccessToken(ctx *gin.Context) *string {
 	return &token[1]
 }
 
-func (autheticationMiddleware *AutheticationMiddleware) verifyToken(ctx *gin.Context, expectedTokenType commonToken.Type) {
+func (autheticationMiddleware *AutheticationMiddleware) verifyToken(
+	ctx *gin.Context,
+	expectedTokenType commonToken.Type,
+) (*jwt.Token, bool) {
 	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
+		return nil, false
 	}
 	parsedAuthorizationToken := ParseAccessToken(ctx)
 	if parsedAuthorizationToken == nil {
-		return
+		return nil, false
 	}
 	parsedToken, err := autheticationMiddleware.jwtVerifier.Verify(*parsedAuthorizationToken)
 	if err != nil {
-		logger.Error(err, "The bearer token was invalid")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, "The bearer token was invalid")
+		return nil, false
 	}
 	claims, err := autheticationMiddleware.jwtTokenInspector.GetClaimsFromToken(parsedToken)
 	if err != nil {
-		logger.Error(err, "Could not obtain claims from bearer token")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, "Could not obtain claims from bearer token")
+		return nil, false
 	}
 	if commonToken.Type(claims.Type) != expectedTokenType {
-		logger.Error(nil, fmt.Sprintf("The bearer token was not an %s but a %s", expectedTokenType, claims.Type))
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, fmt.Sprintf("The bearer token was not an %s but a %s", expectedTokenType, claims.Type))
+		return nil, false
 	}
 
 	if claims.Expiry.Before(time.Now()) {
-		logger.Error(nil, "The bearer token has expired")
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, "The bearer token has expired")
+		return nil, false
 	}
 
 	newContext := commonJWT.AddAuthorizationMetadataToContext(ctx.Request.Context(), *parsedAuthorizationToken)
@@ -180,5 +188,33 @@ func (autheticationMiddleware *AutheticationMiddleware) verifyToken(ctx *gin.Con
 	ctx.Set(string(commonJWT.JWTTokenKey), parsedToken)
 
 	logger.Info("Successfully authenticated user")
+	return parsedToken, true
+}
+
+// RequirePaidFeatures middleware ensures the request has a valid authentication token with HasPaidFeatures set to true
+func (autheticationMiddleware *AutheticationMiddleware) RequirePaidFeatures(ctx *gin.Context) {
+	logger, err := commonLogger.GetLoggerFromContext(ctx.Request.Context())
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	parsedToken, isVerified := autheticationMiddleware.verifyToken(ctx, commonToken.AuthTokenType)
+	if !isVerified {
+		return
+	}
+	claims, err := autheticationMiddleware.jwtTokenInspector.GetClaimsFromToken(parsedToken)
+	if err != nil {
+		logger.Error(err, "Could not obtain claims from bearer token")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	hasPaidFeatures := bool(claims.HasPaidFeatures)
+	if !hasPaidFeatures {
+		ctx.AbortWithStatusJSON(http.StatusPaymentRequired, "User does not have access to paid features")
+		return
+	}
+
+	logger.Info("User has access to paid features")
 	ctx.Next()
 }

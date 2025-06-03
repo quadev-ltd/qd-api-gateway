@@ -96,3 +96,15 @@ func (mr *MockAutheticationMiddlewarerMockRecorder) RequireAuthentication(ctx in
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequireAuthentication", reflect.TypeOf((*MockAutheticationMiddlewarer)(nil).RequireAuthentication), ctx)
 }
+
+// RequirePaidFeatures mocks base method.
+func (m *MockAutheticationMiddlewarer) RequirePaidFeatures(ctx *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "RequirePaidFeatures", ctx)
+}
+
+// RequirePaidFeatures indicates an expected call of RequirePaidFeatures.
+func (mr *MockAutheticationMiddlewarerMockRecorder) RequirePaidFeatures(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RequirePaidFeatures", reflect.TypeOf((*MockAutheticationMiddlewarer)(nil).RequirePaidFeatures), ctx)
+}
